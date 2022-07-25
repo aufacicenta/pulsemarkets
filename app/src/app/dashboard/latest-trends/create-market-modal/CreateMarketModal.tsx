@@ -21,7 +21,6 @@ import near from "providers/near";
 import { DEFAULT_FEE_RATIO, DEFAULT_NETWORK_ENV, DEFAULT_RESOLUTION_WINDOW_DAY_SPAN } from "providers/near/getConfig";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import useNearMarketFactoryContract from "providers/near/contracts/market-factory/useNearMarketFactoryContract";
-import { useWalletStateContext } from "hooks/useWalletStateContext/useWalletStateContext";
 
 import styles from "./CreateMarketModal.module.scss";
 import { CreateMarketModalForm, CreateMarketModalProps } from "./CreateMarketModal.types";
@@ -37,9 +36,8 @@ export const CreateMarketModal: React.FC<CreateMarketModalProps> = ({ className,
 
   const { t } = useTranslation(["latest-trends", "common"]);
   const toast = useToastContext();
-  const wallet = useWalletStateContext();
 
-  const { contract: MarketFactoryContract } = useNearMarketFactoryContract();
+  const MarketFactoryContract = useNearMarketFactoryContract();
 
   const onSubmit = async (values: CreateMarketModalForm) => {
     try {
@@ -73,7 +71,7 @@ export const CreateMarketModal: React.FC<CreateMarketModalProps> = ({ className,
 
       // @TODO validate args, highlight fields if something's missing
 
-      await MarketFactoryContract.createMarket(wallet.context.get().connection!, args);
+      await MarketFactoryContract.createMarket(args);
     } catch {
       toast.trigger({
         variant: "error",

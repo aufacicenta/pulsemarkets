@@ -80,6 +80,14 @@ export default ({ marketId, preventLoad = false }: { marketId: AccountId; preven
 
   const assertWalletConnection = () => {
     if (!wallet.isConnected.get()) {
+      toast.trigger({
+        variant: "info",
+        withTimeout: true,
+        // @TODO i18n
+        title: "Wallet is not connected",
+        children: <Typography.Text>Check your internet connection, your NEAR balance and try again.</Typography.Text>,
+      });
+
       throw new Error("ERR_USE_NEAR_MARKET_CONTRACT_INVALID_WALLET_CONNECTION");
     }
   };
@@ -101,9 +109,9 @@ export default ({ marketId, preventLoad = false }: { marketId: AccountId; preven
         title: "Failed to publish market",
         children: <Typography.Text>Check your internet connection, your NEAR balance and try again.</Typography.Text>,
       });
-    }
 
-    return false;
+      return false;
+    }
   };
 
   const getBalanceOf = async ({ outcome_id }: Omit<BalanceOfArgs, "account_id">) => {

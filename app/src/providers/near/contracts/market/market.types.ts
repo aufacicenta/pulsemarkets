@@ -20,11 +20,17 @@ export type CollateralTokenMetadata = {
   balance: number;
 };
 
+export type PriceHistory = {
+  timestamp: Timestamp;
+  price: WrappedBalance;
+};
+
 export type OutcomeToken = {
   accounts_length: number;
   total_supply: WrappedBalance;
   outcome_id: OutcomeId;
   price: WrappedBalance;
+  price_history: Array<PriceHistory>;
 };
 
 export type MarketContractValues = {
