@@ -1,21 +1,27 @@
 import { useEffect } from "react";
 
-import near from "providers/near";
 import { useWalletStateContext } from "hooks/useWalletStateContext/useWalletStateContext";
+import near from "providers/near";
 import { WalletSelectorChain } from "../selector/WalletSelectorContext.types";
 
 export const useNearWallet = () => {
   const walletState = useWalletStateContext();
 
   useEffect(() => {
-    if (!!walletState.context.get()?.connection?.isSignedIn() && !!walletState.context.get().provider) {
-      return;
-    }
-
     (async () => {
-      const { near: provider, wallet: connection } = await near.initWalletConnection(walletState.network.get());
+      let { connection } = walletState.context.get();
+
+      if (!connection) {
+        const { wallet: newConnection } = await near.initWalletConnection(walletState.network.get());
+        connection = newConnection;
+      }
+
+      if (!!connection?.isSignedIn() && !!walletState.context.get().provider) {
+        return;
+      }
 
       if (connection.isSignedIn()) {
+        const { near: provider } = await near.initWalletConnection(walletState.network.get());
         walletState.isConnected.set(true);
         walletState.context.set({ connection, provider, guest: { address: "guest.near" } });
         walletState.chain.set(WalletSelectorChain.near);
