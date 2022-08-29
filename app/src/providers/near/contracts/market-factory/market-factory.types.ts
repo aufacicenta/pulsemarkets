@@ -4,7 +4,6 @@ export type DeployMarketContractArgs = {
   market: MarketData;
   dao_account_id: string;
   collateral_token_account_id: string;
-  staking_token_account_id: string;
   fee_ratio: number;
   resolution_window: number;
   claiming_window: number;
