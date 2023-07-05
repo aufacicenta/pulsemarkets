@@ -10,8 +10,23 @@
     "stylelint": "stylelint"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.20.0",
-    "@typescript-eslint/parser": "^4.20.0",
+    "web3": "^1.7.1"
+  },
+  "devDependencies": {
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "husky": "^7.0.4",
+    "jest": "^27.4.7",
+    "lint-staged": "^12.1.2",
+    "node-sass": "^9.0.0",
+    "prettier": "^2.4.1",
+    "stylelint": "^14.16.1",
+    "stylelint-config-prettier": "^9.0.4",
+    "stylelint-config-recommended": "^9.0.0",
+    "stylelint-order": "^6.0.1",
+    "stylelint-prettier": "^2.0.0",
+    "stylelint-scss": "^4.3.0",
+    "typed-scss-modules": "^4.1.1",
+    "typescript": "^5.1.6",
     "eslint": "^7.22.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-typescript": "^12.3.1",
@@ -27,22 +42,8 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-testing-library": "^3.10.2",
     "eslint-plugin-unicorn": "^29.0.0",
-    "web3": "^1.7.1"
-  },
-  "devDependencies": {
-    "husky": "^7.0.4",
-    "jest": "^27.4.7",
-    "lint-staged": "^12.1.2",
-    "node-sass": "^9.0.0",
-    "prettier": "^2.4.1",
-    "stylelint": "^14.16.1",
-    "stylelint-config-prettier": "^9.0.4",
-    "stylelint-config-recommended": "^9.0.0",
-    "stylelint-order": "^6.0.1",
-    "stylelint-prettier": "^2.0.0",
-    "stylelint-scss": "^4.3.0",
-    "typed-scss-modules": "^4.1.1",
-    "typescript": "^4.3.2"
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0"
   },
   "lint-staged": {
     "./app/{src,cypress,storybook,scripts}/**/*.{js,jsx,ts,tsx}": [
