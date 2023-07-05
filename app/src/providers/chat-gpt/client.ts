@@ -1,4 +1,4 @@
-import { ChatGPTAPI, ChatGPTAPIOptions, ChatMessage } from "chatgpt";
+import { ChatGPTAPI, ChatGPTAPIOptions } from "chatgpt";
 
 export class ChatGPTClient {
   private readonly chatClient: ChatGPTAPI | undefined;
