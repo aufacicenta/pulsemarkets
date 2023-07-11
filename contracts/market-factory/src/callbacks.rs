@@ -1,5 +1,5 @@
 use near_sdk::{
-    env, ext_contract, near_bindgen, require, serde_json::json, AccountId, Promise, PromiseResult,
+    env, ext_contract, near_bindgen, serde_json::json, AccountId, Promise, PromiseResult,
 };
 
 use crate::consts::*;
@@ -54,7 +54,9 @@ impl MarketFactory {
 
     #[private]
     pub fn on_ft_storage_deposit_callback(&mut self, market_account_id: AccountId) -> bool {
-        require!(env::promise_results_count() == 1);
+        if env::promise_results_count() != 1 {
+            env::panic_str("ERR_ON_FT_STORAGE_DEPOSIT_CALLBACK");
+        }
 
         let is_storage_deposit_success = match env::promise_result(0) {
             PromiseResult::Successful(_result) => true,
