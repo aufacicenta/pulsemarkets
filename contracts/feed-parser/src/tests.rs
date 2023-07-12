@@ -4,6 +4,7 @@ mod tests {
     use chrono::Utc;
     use near_sdk::serde_json::json;
     use near_sdk::test_utils::VMContextBuilder;
+    use near_sdk::test_utils::test_env::{alice, bob, carol};
     use near_sdk::{serde_json, testing_env, AccountId, PromiseResult};
     use sbv2_near::{AggregatorRound, SwitchboardDecimal};
     use shared::Price;
@@ -65,7 +66,7 @@ mod tests {
         let msg = json!({
             "ix": ix,
             "market_options": vec!["yes", "no"],
-            "market_outcome_ids": vec![0, 1],
+            "market_outcome_ids": vec![alice(), bob()],
             "price": 24000.0,
             "predecessor_account_id": predecessor_account_id()
         });
@@ -91,7 +92,7 @@ mod tests {
 
         let winning_outcome_id = contract.on_internal_above_price_feed_read_callback(payload);
 
-        assert_eq!(winning_outcome_id, 0);
+        assert_eq!(winning_outcome_id, alice());
     }
 
     #[test]
@@ -105,7 +106,7 @@ mod tests {
         let msg = json!({
             "ix": ix,
             "market_options": vec!["yes", "no"],
-            "market_outcome_ids": vec![0, 1],
+            "market_outcome_ids": vec![alice(), bob()],
             "price": PRICE - 1.0,
             "predecessor_account_id": predecessor_account_id()
         });
@@ -131,7 +132,7 @@ mod tests {
 
         let winning_outcome_id = contract.on_internal_above_price_feed_read_callback(payload);
 
-        assert_eq!(winning_outcome_id, 1);
+        assert_eq!(winning_outcome_id, bob());
     }
 
     #[test]
@@ -146,7 +147,7 @@ mod tests {
         let msg = json!({
             "ix": ix,
             "market_options": vec!["yes", "no"],
-            "market_outcome_ids": vec![0, 1],
+            "market_outcome_ids": vec![alice(), bob()],
             "price": 24000.0,
         });
 
@@ -171,7 +172,7 @@ mod tests {
 
         let winning_outcome_id = contract.on_internal_above_price_feed_read_callback(payload);
 
-        assert_eq!(winning_outcome_id, 0);
+        assert_eq!(winning_outcome_id, alice());
     }
 
     #[test]
@@ -187,7 +188,7 @@ mod tests {
         "AggregatorReadArgs": {
             "ix": ix,
             "market_options": vec!["whatever", "no"],
-            "market_outcome_ids": vec![0, 1],
+            "market_outcome_ids": vec![alice(), bob()],
             "price": 24000.0,
         }});
 
@@ -209,7 +210,7 @@ mod tests {
         "AggregatorReadArgs": {
             "ix": ix,
             "market_options": vec!["yes", "no"],
-            "market_outcome_ids": vec![0, 1, 2],
+            "market_outcome_ids": vec![alice(), bob(), carol()],
             "price": 24000.0,
         }});
 

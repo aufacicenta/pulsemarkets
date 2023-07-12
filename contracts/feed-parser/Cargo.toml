@@ -14,7 +14,8 @@ serde = "1.0.152"
 shared = { path = "../shared", env = "testnet" }
 
 [dev-dependencies]
-chrono = "0.4.23"
+chrono = "0.4.26"
+time = "0.2.23"
 
 [profile.release]
 codegen-units = 1

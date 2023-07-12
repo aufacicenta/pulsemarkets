@@ -6,7 +6,7 @@ use crate::storage::*;
 
 #[ext_contract(ext_market)]
 trait Market {
-    fn resolve(&mut self, outcome_id: u64, ix: Ix);
+    fn resolve(&mut self, outcome_id: OutcomeId, ix: Ix);
 }
 
 #[near_bindgen]
@@ -36,16 +36,16 @@ impl SwitchboardFeedParser {
                 predecessor_account_id
             );
 
-            let mut winning_outcome_id = payload.market_outcome_ids[0];
+            let mut winning_outcome_id = &payload.market_outcome_ids[0];
 
             if payload.price < result {
-                winning_outcome_id = payload.market_outcome_ids[1];
+                winning_outcome_id = &payload.market_outcome_ids[1];
             }
 
             // @TODO add a callback for this promise in case it errors
-            ext_market::ext(predecessor_account_id).resolve(winning_outcome_id, payload.ix);
+            ext_market::ext(predecessor_account_id).resolve(winning_outcome_id.clone(), payload.ix);
 
-            return winning_outcome_id;
+            return winning_outcome_id.clone();
         }
 
         env::panic_str("ERROR_ON_AGGREGATOR_READ_CALLBACK");
