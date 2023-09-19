@@ -160,6 +160,10 @@ body[data-theme="dark"] {
   --color-input-border: var(--color-black);
   --color-input-label: rgba(255, 255, 255, 0.7);
   --color-input-placeholder: rgba(255, 255, 255, 0.22);
+
+  // Modal
+  --color-modal-overlay: var(--color-black);
+  --opacity-modal-overlay: 0.8;
 }
 
 body[data-theme="light"] {

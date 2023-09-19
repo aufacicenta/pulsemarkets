@@ -29,6 +29,7 @@ export type NearPromptWarsMarketContractContextContextActions = {
   fetchMarketContractValues: { isLoading: boolean };
   ftTransferCall: {
     isLoading: boolean;
+    success: boolean;
   };
   create: {
     isLoading: boolean;

@@ -14,11 +14,13 @@ import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { Prompt } from "providers/near/contracts/prompt-wars/prompt-wars.types";
 import { ResultsModal } from "ui/pulse/prompt-wars/results-modal/ResultsModal";
+import { ShareModal } from "ui/pulse/prompt-wars/share-modal/ShareModal";
 
 import styles from "./PromptWars.module.scss";
 import { PromptWarsProps } from "./PromptWars.types";
 
 export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) => {
+  const [isShareModalVisible, displayShareModal] = useState(false);
   const [isFAQsModalVisible, displayFAQsModal] = useState(false);
   const [isResultsModalVisible, displayResultsModal] = useState(false);
 
@@ -32,6 +34,12 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   useEffect(() => {
     fetchMarketContractValues();
   }, [marketId]);
+
+  useEffect(() => {
+    if (actions.ftTransferCall.success) {
+      displayShareModal(true);
+    }
+  }, [actions.ftTransferCall.success]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,6 +72,10 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
 
   const onClaimDepositUnresolved = async () => {
     await sell();
+  };
+
+  const onClickCloseShareModal = () => {
+    displayShareModal(false);
   };
 
   const onClickCloseFAQsModal = () => {
@@ -125,6 +137,8 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
           </div>
         </Grid.Container>
       </MainPanel.Container>
+
+      {isShareModalVisible && <ShareModal onClose={onClickCloseShareModal} />}
 
       {isFAQsModalVisible && <FaqsModal onClose={onClickCloseFAQsModal} />}
 

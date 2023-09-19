@@ -34,6 +34,7 @@ export const NearPromptWarsMarketContractContextController = ({
       isLoading: false,
     },
     ftTransferCall: {
+      success: false,
       isLoading: false,
     },
     create: {
@@ -46,7 +47,7 @@ export const NearPromptWarsMarketContractContextController = ({
 
   const toast = useToastContext();
 
-  const walletState = useWalletStateContext();
+  const walletStateContext = useWalletStateContext();
 
   const getMarketStatus = (values: PromptWarsMarketContractValues): PromptWarsMarketContractStatus => {
     if (!values) {
@@ -161,7 +162,7 @@ export const NearPromptWarsMarketContractContextController = ({
   };
 
   const assertWalletConnection = () => {
-    if (!walletState.isConnected) {
+    if (!walletStateContext.isConnected) {
       toast.trigger({
         variant: "info",
         withTimeout: true,
@@ -193,7 +194,7 @@ export const NearPromptWarsMarketContractContextController = ({
       const msg = JSON.stringify({ CreateOutcomeTokenArgs: { prompt: JSON.stringify(prompt) } });
 
       await FungibleTokenContract.ftTransferCall(
-        walletState.context.wallet!,
+        walletStateContext.context.wallet!,
         marketContractValues.collateralToken.id!,
         {
           receiver_id: marketId,
@@ -207,6 +208,7 @@ export const NearPromptWarsMarketContractContextController = ({
         ftTransferCall: {
           ...prev.ftTransferCall,
           isLoading: false,
+          success: true,
         },
       }));
 
@@ -229,6 +231,15 @@ export const NearPromptWarsMarketContractContextController = ({
         title: "Failed to make transfer call",
         children: <Typography.Text>Check your internet connection, connect your wallet and try again.</Typography.Text>,
       });
+
+      setActions((prev) => ({
+        ...prev,
+        ftTransferCall: {
+          ...prev.ftTransferCall,
+          isLoading: false,
+          success: true,
+        },
+      }));
     }
   };
 
@@ -236,7 +247,7 @@ export const NearPromptWarsMarketContractContextController = ({
     try {
       assertWalletConnection();
 
-      await PromptWarsMarketContract.sell(walletState.context.wallet!, marketId);
+      await PromptWarsMarketContract.sell(walletStateContext.context.wallet!, marketId);
 
       toast.trigger({
         variant: "confirmation",

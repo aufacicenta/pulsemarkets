@@ -73,7 +73,9 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({ onClose, className, 
       fullscreenVariant="default"
     >
       <Modal.Header onClose={onClose}>
-        <Typography.Headline2 flat>Results</Typography.Headline2>
+        <Typography.Headline2 className={styles["results-modal__title"]} flat>
+          Results <span>(closest to 0 wins)</span>
+        </Typography.Headline2>
         <Typography.Text flat>
           Winner:{" "}
           <>
@@ -109,21 +111,19 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({ onClose, className, 
                       role="button"
                       tabIndex={0}
                     >
-                      <Grid.Row>
-                        <Grid.Col className={styles["results-modal__outcome-ids-list--item-left"]}>
-                          <Typography.Description
-                            flat
-                            className={clsx({
-                              [styles["results-modal__outcome-ids-list--item-winner"]]: outcomeId === resolution.result,
-                            })}
-                          >
-                            {outcomeId}
-                          </Typography.Description>
-                        </Grid.Col>
-                        <Grid.Col className={styles["results-modal__outcome-ids-list--item-right"]}>
-                          <Icon name="icon-chevron-right" />
-                        </Grid.Col>
-                      </Grid.Row>
+                      <div className={styles["results-modal__outcome-ids-list--item-left"]}>
+                        <Typography.Description
+                          flat
+                          className={clsx({
+                            [styles["results-modal__outcome-ids-list--item-winner"]]: outcomeId === resolution.result,
+                          })}
+                        >
+                          {outcomeId === resolution.result && <Icon name="icon-medal-first" />} {outcomeId}
+                        </Typography.Description>
+                      </div>
+                      <div className={styles["results-modal__outcome-ids-list--item-right"]}>
+                        <Icon name="icon-chevron-right" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -160,7 +160,7 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({ onClose, className, 
             </Typography.Text>
           </Grid.Col>
           <Grid.Col lg={3}>
-            <Typography.Description>Result</Typography.Description>
+            <Typography.Description>Result (closest to 0 wins)</Typography.Description>
             <Typography.Headline2 flat>{outcomeToken?.result || "Loading"}</Typography.Headline2>
           </Grid.Col>
         </Grid.Row>
