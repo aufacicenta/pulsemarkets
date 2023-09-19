@@ -214,7 +214,7 @@ export const NearPromptWarsMarketContractContextController = ({
 
       toast.trigger({
         variant: "confirmation",
-        withTimeout: false,
+        withTimeout: true,
         title: "Your prompt was successfully submitted",
         children: (
           <Typography.Text>{`Transferred USDT ${currency.convert.toDecimalsPrecisionString(

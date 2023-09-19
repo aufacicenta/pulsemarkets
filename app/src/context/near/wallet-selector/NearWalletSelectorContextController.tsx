@@ -187,6 +187,10 @@ export const NearWalletSelectorContextController = ({ children }: NearWalletSele
   }, [selector]);
 
   useEffect(() => {
+    if (!selector) {
+      return;
+    }
+
     (async () => {
       try {
         if (ls.get("near_app_wallet_auth_key") !== null) {
@@ -234,7 +238,7 @@ export const NearWalletSelectorContextController = ({ children }: NearWalletSele
         }));
       }
     })();
-  }, []);
+  }, [selector]);
 
   const initModal = (contractId: string) => {
     setModal(
