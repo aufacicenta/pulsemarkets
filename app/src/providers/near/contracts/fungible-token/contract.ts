@@ -6,6 +6,7 @@ import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 
 import near from "providers/near";
 import { AccountId } from "../market/market.types";
+import { ErrorCode } from "providers/near/error-codes";
 
 import {
   FungibleTokenContractMethods,
@@ -114,11 +115,15 @@ export class FungibleTokenContract {
         ],
       });
 
-      near.unwrapFinalExecutionOutcome(response as FinalExecutionOutcome);
+      const value = near.unwrapFinalExecutionOutcome(response as FinalExecutionOutcome);
+
+      if (value === "0") {
+        throw new Error("ERR_FungibleTokenContract_ftTransferCall: failed transfer");
+      }
     } catch (error) {
       console.log(error);
 
-      throw new Error("ERR_FungibleTokenContract_ftTransferCall");
+      throw new Error(ErrorCode.ERR_FungibleTokenContract_ftTransferCall);
     }
 
     return "0.00";

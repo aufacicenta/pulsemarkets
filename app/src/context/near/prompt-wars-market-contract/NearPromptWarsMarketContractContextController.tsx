@@ -15,6 +15,7 @@ import { useWalletStateContext } from "context/wallet/state/useWalletStateContex
 import { FungibleTokenContract } from "providers/near/contracts/fungible-token/contract";
 import currency from "providers/currency";
 import { useRoutes } from "hooks/useRoutes/useRoutes";
+import { ErrorCode } from "providers/near/error-codes";
 
 import {
   NearPromptWarsMarketContractContextContextActions,
@@ -225,12 +226,22 @@ export const NearPromptWarsMarketContractContextController = ({
       });
 
       fetchMarketContractValues();
-    } catch {
-      toast.trigger({
-        variant: "error",
-        title: "Failed to make transfer call",
-        children: <Typography.Text>Check your internet connection, connect your wallet and try again.</Typography.Text>,
-      });
+    } catch (error) {
+      if ((error as Error).message === ErrorCode.ERR_FungibleTokenContract_ftTransferCall) {
+        toast.trigger({
+          variant: "error",
+          title: "Failed to make transfer call",
+          children: <Typography.Text>You already transferred to this match.</Typography.Text>,
+        });
+      } else {
+        toast.trigger({
+          variant: "error",
+          title: "Failed to make transfer call",
+          children: (
+            <Typography.Text>Check your internet connection, connect your wallet and try again.</Typography.Text>
+          ),
+        });
+      }
 
       setActions((prev) => ({
         ...prev,
