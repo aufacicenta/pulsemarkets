@@ -1,0 +1,22 @@
+name: call self_destruct contract method at the end of every month
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # This runs on the 1st day of every month at midnight
+
+jobs:
+  cron-selfDestruct:
+    env:
+      APP_URL: ${{ secrets.APP_URL }}
+      CRON_API_KEY: ${{ secrets.CRON_API_KEY }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: cURL request
+        if: ${{ env.APP_URL && env.CRON_API_KEY }}
+        run: |
+          curl ${{ secrets.APP_URL }}/api/cron/selfDestruct \
+          -X POST
+          -H 'content-type: application/json' \
+          -H 'authorization: ${{ secrets.CRON_API_KEY }}' \
+          --fail
