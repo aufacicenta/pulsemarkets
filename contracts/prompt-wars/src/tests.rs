@@ -285,7 +285,7 @@ mod tests {
         assert_eq!(contract.balance_of(&player_3), 0);
 
         assert_eq!(contract.collateral_token.balance, 0);
-        assert_eq!(contract.collateral_token.fee_balance, 6_000_000);
+        assert_eq!(contract.collateral_token.fee_balance, 6000);
     }
 
     #[test]
@@ -397,7 +397,7 @@ mod tests {
         sell(&mut contract, &context, player_3.clone());
 
         assert_eq!(contract.collateral_token.balance, 0);
-        assert_eq!(contract.collateral_token.fee_balance, 6_000_000);
+        assert_eq!(contract.collateral_token.fee_balance, 6000);
 
         // now is after the resolution window
         // called by owner
