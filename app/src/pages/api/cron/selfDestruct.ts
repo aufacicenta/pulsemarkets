@@ -25,21 +25,21 @@ export default async function Fn(_request: NextApiRequest, response: NextApiResp
           const is_self_destruct_window_expired = await contract.is_self_destruct_window_expired();
 
           if (!is_self_destruct_window_expired) {
-            throw new Error("ERR_LATEST_MARKET_IS_STILL_ACTIVE");
+            logger.info(`ERR_LATEST_MARKET_IS_STILL_ACTIVE for market ${marketId}`);
+          } else {
+            await PromptWarsMarketContract.selfDestruct(marketId);
+            logger.info(`self_destruct method called for market ${marketId}`);
           }
-
-          await PromptWarsMarketContract.selfDestruct(marketId);
-
-          logger.info(`self_destruct method called for market ${marketId}`);
         } catch (error) {
           logger.error(error);
         }
       }),
     );
 
-    response.status(200).json({});
+    return response.status(200).json({});
   } catch (error) {
     logger.error(error);
-    response.status(500).json({ error: (error as Error).message });
+
+    return response.status(500).json({ error: (error as Error).message });
   }
 }
