@@ -767,8 +767,8 @@ mod tests {
             .signer_account_id(market_creator_account_id())
             .build());
 
-        let mut outcome_id = alice();
-        let mut result = 0.3;
+        let outcome_id = alice();
+        let result = 0.3;
         let output_img_uri = "".to_string();
     
         reveal(&mut contract, outcome_id, result, output_img_uri.clone());    
