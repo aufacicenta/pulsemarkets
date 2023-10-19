@@ -14,6 +14,7 @@ export default async function Fn(_request: NextApiRequest, response: NextApiResp
   if (_request.method !== "POST") {
     return response.status(405).json({ message: "Invalid method" });
   }
+
   try {
     const marketFactory = await MarketFactoryContract.loadFromGuestConnection();
     const marketsList = await marketFactory.get_markets_list();
@@ -22,9 +23,9 @@ export default async function Fn(_request: NextApiRequest, response: NextApiResp
       marketsList!.map(async (marketId) => {
         try {
           const contract = await PromptWarsMarketContract.loadFromGuestConnection(marketId!);
-          const is_self_destruct_window_expired = await contract.is_self_destruct_window_expired();
+          const isSelfDestructWindowExpired = await contract.is_self_destruct_window_expired();
 
-          if (!is_self_destruct_window_expired) {
+          if (!isSelfDestructWindowExpired) {
             logger.info(`ERR_LATEST_MARKET_IS_STILL_ACTIVE for market ${marketId}`);
           } else {
             await PromptWarsMarketContract.selfDestruct(marketId);
