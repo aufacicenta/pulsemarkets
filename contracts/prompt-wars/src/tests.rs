@@ -671,24 +671,133 @@ mod tests {
         contract.self_destruct();
     }
 
-    // @TODO test for panic ERR_MARKET_IS_CLOSED. labels: 100 USDT
-    // #[test]
-    // #[should_panic(expected = "ERR_MARKET_IS_CLOSED")]
-    // fn should_fail_on_create_outcome_token_for_player_after_threshold() {}
+    #[test]
+    #[should_panic(expected = "ERR_ASSERT_PRICE_TOO_LOW")]
+    fn should_fail_on_create_outcome_token_for_player_when_amount_lt_price() {
+        let mut context = setup_context();
 
-    // @TODO test for ERR_MARKET_RESOLVED
-    // labels: 100 USDT
+        let now = Utc::now();
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
 
-    // #[test]
-    // #[should_panic(expected = "ERR_MARKET_RESOLVED")]
-    // fn should_fail_on_create_outcome_token_for_player_when_resolved() {}
+        let market_data: MarketData = create_market_data();
+        let mut contract: Market = setup_contract(market_data);
 
-    // @TODO test for ERR_ASSERT_PRICE_TOO_LOW
-    // labels: 100 USDT
+        // Attempt to create an outcome token with an amount lower than CREATE_OUTCOME_TOKEN_PRICE
+        let amount = CREATE_OUTCOME_TOKEN_PRICE - 1;
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
 
-    // #[test]
-    // #[should_panic(expected = "ERR_ASSERT_PRICE_TOO_LOW")]
-    // fn should_fail_on_create_outcome_token_for_player_when_amount_lt_price() {}
+        let player_1 = alice();
+
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+
+        contract.self_destruct();
+    }
+
+    #[test]
+    #[should_panic(expected = "ERR_MARKET_IS_CLOSED")]
+    fn should_fail_on_create_outcome_token_for_player_after_threshold() {
+        let mut context = setup_context();
+
+        let mut now = Utc::now();
+        let starts_at = now + Duration::hours(1);
+        let ends_at = starts_at + Duration::hours(1);
+
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
+      
+        let market_data: MarketData = create_market_data();
+        let mut contract: Market = setup_contract(market_data);
+
+        now = ends_at + Duration::hours(1);
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
+
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        let player_1 = alice();
+
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+
+    
+        contract.self_destruct();
+    }
+
+    #[test]
+    #[should_panic(expected = "ERR_MARKET_RESOLVED")]
+    fn should_fail_on_create_outcome_token_for_player_when_resolved() {
+        let mut context = setup_context();
+
+        let now = Utc::now();
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
+
+        let market_data: MarketData = create_market_data();
+        let mut contract: Market = setup_contract(market_data);
+
+        let player_1 = alice();
+
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+
+        testing_env!(context
+            .signer_account_id(market_creator_account_id())
+            .build());
+
+        let outcome_id = alice();
+        let result = 0.3;
+        let output_img_uri = "".to_string();
+    
+        reveal(&mut contract, outcome_id, result, output_img_uri.clone());    
+
+        // Set the market as resolved
+        resolve(&mut contract);
+        
+        assert_eq!(contract.is_resolved(), true);
+
+        let player_2 = bob();
+
+        testing_env!(
+            context
+                .block_timestamp(block_timestamp(now))
+                .signer_account_id(player_2.clone())
+                .build()
+        );
+
+        // Attempt to create an outcome token for a player after the market is resolved
+        create_outcome_token(
+            &mut contract,
+            player_2.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+    }
+
 
     // @TODO test for ERR_SET_RESULT_ALREADY_SET
     // labels: 100 USDT
