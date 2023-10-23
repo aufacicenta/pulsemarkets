@@ -799,12 +799,45 @@ mod tests {
     }
 
 
-    // @TODO test for ERR_SET_RESULT_ALREADY_SET
-    // labels: 100 USDT
+    #[test]
+    #[should_panic(expected = "ERR_SET_RESULT_ALREADY_SET")]
+    fn should_fail_on_reveal_set_result() {
+        let mut context = setup_context();
 
-    // #[test]
-    // #[should_panic(expected = "ERR_SET_RESULT_ALREADY_SET")]
-    // fn should_fail_on_reveal_set_result() {}
+        let now = Utc::now();
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
+
+        let market_data: MarketData = create_market_data();
+        let mut contract: Market = setup_contract(market_data);
+
+        let player_1 = alice();
+
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+
+        testing_env!(context
+            .signer_account_id(market_creator_account_id())
+            .build());
+
+        let outcome_id = alice();
+        let result = 0.3;
+        let output_img_uri = "".to_string();
+
+        reveal(&mut contract, outcome_id.clone(), result, output_img_uri.clone());  
+    
+        // Attempt to reveal the result again, which should fail with ERR_SET_RESULT_ALREADY_SET
+        reveal(&mut contract, outcome_id.clone(), 0.5, output_img_uri.clone());  
+    }
 
     // @TODO test for ERR_GET_AMOUNT_PAYABLE_UNRESOLVED_INVALID_AMOUNT
     // labels: 100 USDT
@@ -820,24 +853,97 @@ mod tests {
     // #[should_panic(expected = "ERR_MARKET_IS_UNDER_RESOLUTION")]
     // fn should_fail_on_selling_under_resolution_window() {}
 
-    // @TODO test for ERR_SIGNER_IS_NOT_OWNER
-    // labels: 100 USDT
+    #[test]
+    #[should_panic(expected = "ERR_SIGNER_IS_NOT_OWNER")]
+    fn should_fail_on_reveal_not_owner() {
+        let mut context = setup_context();
 
-    // #[test]
-    // #[should_panic(expected = "ERR_SIGNER_IS_NOT_OWNER")]
-    // fn should_fail_on_reveal_not_owner() {}
+        let mut now = Utc::now();
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
 
-    // @TODO test for ERR_PLAYER_IS_NOT_WINNER
-    // labels: 100 USDT
+        let market_data: MarketData = create_market_data();
+        let mut contract: Market = setup_contract(market_data);
+
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt = json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        let player_1 = alice();
+
+        create_outcome_token(&mut contract, player_1.clone(), amount, CreateOutcomeTokenArgs {
+            prompt: prompt.clone(),
+        });
+
+        now = Utc.timestamp_nanos(contract.get_market_data().ends_at) + Duration::minutes(2);
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
+
+        // Ensure the market is resolved first
+        resolve(&mut contract);
+
+        // Attempt to reveal the result by a non-owner account
+        testing_env!(context.signer_account_id(bob()).build());
+
+        // The following call to the reveal function should fail with ERR_SIGNER_IS_NOT_OWNER
+        reveal(&mut contract, player_1.clone(), 0.3, "".to_string());
+    }
 
     // #[test]
     // #[should_panic(expected = "ERR_PLAYER_IS_NOT_WINNER")]
     // fn should_fail_on_sell_player_is_not_winner() {}
 
-    // @TODO test for ERR_FEES_CLAIMED
-    // labels: 100 USDT
+    #[test]
+    #[should_panic(expected = "ERR_FEES_CLAIMED")]
+    fn should_fail_on_fees_claimed_after_resolution() {
+        let mut context = setup_context();
 
-    // #[test]
-    // #[should_panic(expected = "ERR_FEES_CLAIMED")]
-    // fn should_fail_on_fees_claimed_after_resolution() {}
+        let mut now = Utc::now();
+        testing_env!(context.block_timestamp(block_timestamp(now)).build());
+
+        let market_data: MarketData = create_market_data();
+        let mut contract: Market = setup_contract(market_data);
+
+        let player_1 = alice();
+
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+
+        testing_env!(context
+            .signer_account_id(market_creator_account_id())
+            .build());
+
+        let outcome_id = alice();
+        let result = 0.3;
+        let output_img_uri = "".to_string();
+
+        reveal(&mut contract, outcome_id, result, output_img_uri.clone());    
+
+        // Set the market as resolved
+        resolve(&mut contract);
+        assert_eq!(contract.is_resolved(), true);
+
+
+        now = Utc.timestamp_nanos(contract.get_resolution_data().window) + Duration::minutes(2);
+        testing_env!(
+            context
+                .block_timestamp(block_timestamp(now))
+                .signer_account_id(market_creator_account_id())
+                .build(),
+            near_sdk::VMConfig::test(),
+            near_sdk::RuntimeFeesConfig::test(),
+            Default::default(),
+            vec![PromiseResult::Successful(vec![])],
+        );
+
+        contract.on_claim_fees_resolved_callback();
+        contract.claim_fees();
+    }
 }
