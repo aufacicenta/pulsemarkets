@@ -471,6 +471,17 @@ mod tests {
             vec![PromiseResult::Successful(vec![])],
         );
 
+        // Check timestamps and flags
+        assert_eq!(contract.is_open(), false);
+        assert_eq!(contract.is_over(), true);
+        assert_eq!(contract.is_reveal_window_expired(), true);
+        assert_eq!(contract.is_expired_unresolved(), true);
+        assert_eq!(contract.is_resolved(), false);
+        assert_eq!(contract.is_resolution_window_expired(), true);
+
+        assert_eq!(contract.get_resolution_data().resolved_at.is_some(), true);
+        assert_eq!(contract.get_fee_data().claimed_at.is_some(), false);        
+
         // now is after the self_destruct window
         // called by owner
         now = Utc.timestamp_nanos(contract.get_resolution_data().window) + Duration::days(8);
