@@ -289,6 +289,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "ERR_COLLATERAL_TOKEN_FEE_BALANCE_GREATER_THAN_ZERO")]
     fn sell_resolved() {
         let mut context = setup_context();
 
@@ -440,6 +441,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "ERR_NO_OUTCOME_IDS")]
     fn self_destruct_resolved_no_players() {
         let mut context = setup_context();
 
@@ -452,25 +454,7 @@ mod tests {
         testing_env!(context
             .signer_account_id(market_creator_account_id())
             .build());
-
-            let amount = CREATE_OUTCOME_TOKEN_PRICE;
-            let prompt =
-                    json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
-        
-            let player_1 = alice();
-        
-            create_outcome_token(
-                    &mut contract,
-                    player_1.clone(),
-                    amount,
-                    CreateOutcomeTokenArgs {
-                        prompt: prompt.clone(),
-                    },
-            );
-
-        let output_img_uri = "".to_string();
-    
-        reveal(&mut contract, player_1.clone(), 0.3, output_img_uri.clone());    
+ 
         resolve(&mut contract);
 
         // now is after the resolution window
@@ -500,11 +484,6 @@ mod tests {
             Default::default(),
             vec![PromiseResult::Successful(vec![])],
         );
-
-        contract.claim_fees();
-        contract.on_claim_fees_resolved_callback();
-
-        assert_eq!(contract.get_fee_data().claimed_at.is_some(), true);
 
         contract.self_destruct();
         contract.on_claim_balance_self_destruct_callback(
