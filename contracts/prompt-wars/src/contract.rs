@@ -243,13 +243,9 @@ impl Market {
             env::panic_str("ERR_NO_OUTCOME_IDS");
         }
 
-        if !self.fees.claimed_at.is_some()
+        if !self.fees.claimed_at.is_some() && self.collateral_token.fee_balance > 0
         {
             env::panic_str("ERR_SELF_DESTRUCT_FEES_UNCLAIMED");
-        }
-
-        if self.collateral_token.fee_balance > 0 {
-            env::panic_str("ERR_COLLATERAL_TOKEN_FEE_BALANCE_GREATER_THAN_ZERO");
         }
 
         let amount_payable = self.collateral_token.balance;

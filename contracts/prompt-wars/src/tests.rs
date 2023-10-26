@@ -289,7 +289,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "ERR_COLLATERAL_TOKEN_FEE_BALANCE_GREATER_THAN_ZERO")]
     fn sell_resolved() {
         let mut context = setup_context();
 
