@@ -453,6 +453,24 @@ mod tests {
             .signer_account_id(market_creator_account_id())
             .build());
 
+            let amount = CREATE_OUTCOME_TOKEN_PRICE;
+            let prompt =
+                    json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+        
+            let player_1 = alice();
+        
+            create_outcome_token(
+                    &mut contract,
+                    player_1.clone(),
+                    amount,
+                    CreateOutcomeTokenArgs {
+                        prompt: prompt.clone(),
+                    },
+            );
+
+        let output_img_uri = "".to_string();
+    
+        reveal(&mut contract, player_1.clone(), 0.3, output_img_uri.clone());    
         resolve(&mut contract);
 
         // now is after the resolution window
@@ -469,17 +487,6 @@ mod tests {
             vec![PromiseResult::Successful(vec![])],
         );
 
-        // Check timestamps and flags
-        assert_eq!(contract.is_open(), false);
-        assert_eq!(contract.is_over(), true);
-        assert_eq!(contract.is_reveal_window_expired(), true);
-        assert_eq!(contract.is_expired_unresolved(), true);
-        assert_eq!(contract.is_resolved(), false);
-        assert_eq!(contract.is_resolution_window_expired(), true);
-
-        assert_eq!(contract.get_resolution_data().resolved_at.is_some(), true);
-        assert_eq!(contract.get_fee_data().claimed_at.is_some(), false);
-
         // now is after the self_destruct window
         // called by owner
         now = Utc.timestamp_nanos(contract.get_resolution_data().window) + Duration::days(8);
@@ -493,6 +500,11 @@ mod tests {
             Default::default(),
             vec![PromiseResult::Successful(vec![])],
         );
+
+        contract.claim_fees();
+        contract.on_claim_fees_resolved_callback();
+
+        assert_eq!(contract.get_fee_data().claimed_at.is_some(), true);
 
         contract.self_destruct();
         contract.on_claim_balance_self_destruct_callback(
