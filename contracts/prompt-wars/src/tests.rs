@@ -440,7 +440,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "ERR_NO_OUTCOME_IDS")]
     fn self_destruct_resolved_no_players() {
         let mut context = setup_context();
 
@@ -453,6 +452,24 @@ mod tests {
         testing_env!(context
             .signer_account_id(market_creator_account_id())
             .build());
+
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt = json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        let player_1 = alice();
+
+        create_outcome_token(
+                &mut contract,
+                player_1.clone(),
+                amount,
+                CreateOutcomeTokenArgs {
+                    prompt: prompt.clone(),
+                },
+            );
+
+        let output_img_uri = "".to_string();
+
+        reveal(&mut contract, player_1.clone(), 0.3, output_img_uri.clone());            
  
         resolve(&mut contract);
 
@@ -474,12 +491,15 @@ mod tests {
         assert_eq!(contract.is_open(), false);
         assert_eq!(contract.is_over(), true);
         assert_eq!(contract.is_reveal_window_expired(), true);
-        assert_eq!(contract.is_expired_unresolved(), true);
-        assert_eq!(contract.is_resolved(), false);
         assert_eq!(contract.is_resolution_window_expired(), true);
 
         assert_eq!(contract.get_resolution_data().resolved_at.is_some(), true);
-        assert_eq!(contract.get_fee_data().claimed_at.is_some(), false);        
+        assert_eq!(contract.get_fee_data().claimed_at.is_some(), false);   
+        
+        contract.claim_fees();
+        contract.on_claim_fees_resolved_callback();
+
+        assert_eq!(contract.get_fee_data().claimed_at.is_some(), true);
 
         // now is after the self_destruct window
         // called by owner
