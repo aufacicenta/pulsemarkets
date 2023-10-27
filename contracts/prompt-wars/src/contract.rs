@@ -19,7 +19,11 @@ trait Callbacks {
         amount_payable: WrappedBalance,
         outcome_id: OutcomeId,
     ) -> String;
-    fn on_claim_fees_resolved_callback(&mut self, payee: AccountId) -> Option<Timestamp>;
+    fn on_claim_fees_resolved_callback(
+        &mut self,
+        payee: AccountId,
+        amount_paid: WrappedBalance,
+    ) -> Option<Timestamp>;
     fn on_claim_balance_self_destruct_callback(
         &mut self,
         payee: AccountId,
@@ -226,7 +230,7 @@ impl Market {
         let ft_transfer_callback_promise = ext_self::ext(env::current_account_id())
             .with_attached_deposit(0)
             .with_static_gas(GAS_FT_TRANSFER_CALLBACK)
-            .on_claim_fees_resolved_callback(payee);
+            .on_claim_fees_resolved_callback(payee, amount_payable);
 
         ft_transfer_promise.then(ft_transfer_callback_promise);
     }
@@ -243,8 +247,7 @@ impl Market {
             env::panic_str("ERR_NO_OUTCOME_IDS");
         }
 
-        if !self.fees.claimed_at.is_some() 
-        && self.collateral_token.fee_balance > 0 {
+        if !self.fees.claimed_at.is_some() || self.collateral_token.fee_balance > 0 {
             env::panic_str("ERR_SELF_DESTRUCT_FEES_UNCLAIMED");
         }
 

@@ -35,14 +35,21 @@ impl Market {
     }
 
     #[private]
-    pub fn on_claim_fees_resolved_callback(&mut self) -> Option<Timestamp> {
+    pub fn on_claim_fees_resolved_callback(
+        &mut self,
+        payee: AccountId,
+        amount_paid: WrappedBalance,
+    ) -> Option<Timestamp> {
         match env::promise_result(0) {
             PromiseResult::Successful(_result) => {
                 self.fees.claimed_at = Some(self.get_block_timestamp());
+                self.collateral_token.fee_balance -= amount_paid;
 
                 log!(
-                    "on_claim_fees_resolved_callback: {:?}",
-                    self.fees.claimed_at
+                    "on_claim_fees_resolved_callback; fees.claimed_at: {:?}, collateral_token.fee_balance: {}, paid_to: {}",
+                    self.fees.claimed_at,
+                    self.collateral_token.fee_balance,
+                    payee
                 );
 
                 self.fees.claimed_at.unwrap()
