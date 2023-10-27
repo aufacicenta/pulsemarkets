@@ -37,7 +37,9 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
     if (status === PromptWarsMarketContractStatus.REVEALING) {
       return (
         <>
-          <Typography.Text flat>{t(`promptWars.status.${status}`)}</Typography.Text>
+          <Typography.Text flat className={styles["img-prompt-card__status--text"]}>
+            {t(`promptWars.status.${status}`)} <span>(closest to 0 wins)</span>
+          </Typography.Text>
           <Typography.MiniDescription onClick={onClickSeeResults}>
             {t("promptWars.status.miniDescription.seeResults")}
           </Typography.MiniDescription>

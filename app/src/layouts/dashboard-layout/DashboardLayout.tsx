@@ -13,6 +13,7 @@ import { NearMarketFactoryContractContextController } from "context/near/market-
 import { NearPromptWarsMarketContractContextController } from "context/near/prompt-wars-market-contract/NearPromptWarsMarketContractContextController";
 import { Footer } from "ui/footer/Footer";
 import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
+import { useLocalStorage } from "hooks/useLocalStorage/useLocalStorage";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
@@ -22,9 +23,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
 
   const { locale } = useRouter();
 
+  const ls = useLocalStorage();
+
   useEffect(() => {
     // @todo set with a toggle button from navbar or footer
     document.body.dataset.theme = "dark";
+  }, []);
+
+  useEffect(() => {
+    if (ls.get("promptwars_wallet_auth_key") === null) {
+      console.log(`PulseSidebar: displaying guest connection pulse`);
+
+      setSidebarVisibility(true);
+    }
   }, []);
 
   return (

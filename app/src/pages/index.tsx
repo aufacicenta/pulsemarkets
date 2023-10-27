@@ -18,7 +18,7 @@ const Index: NextPage<{ marketId: AccountId }> = ({ marketId }) => {
         <meta name="description" content={t("head.og.description")} />
         <meta property="og:title" content={t("head.og.title")} />
         <meta property="og:description" content={t("head.og.description")} />
-        <meta property="og:url" content="https://app.pulsemarkets.org/" />
+        <meta property="og:url" content="https://promptwars.xyz/" />
       </Head>
 
       <HomeContainer marketId={marketId} />
