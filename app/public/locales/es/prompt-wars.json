@@ -25,7 +25,7 @@
   "promptWars.button.submitPrompt": "Enviar Prompt",
   "promptWars.button.submitPrompt.loading": "Enviando",
   "promptWars.description.usdt": "USDT",
-  "promptWars.negativePrompt.add": "Añade un prompt negativo",
+  "promptWars.negativePrompt.add": "Añade un prompt negativo (cosas que no quieres ver en la imagen)",
   "promptWars.description.coverStorageFee": "desde su wallet. Esto cubrirá los gastos de almacenamiento y la comisión de participación.",
   "promptWars.headline.writeNegativePromptHere": "Escribe tu prompt negativo aquí…",
   "promptWars.status.description.youReIn": "Estás dentro!",

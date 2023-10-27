@@ -16,8 +16,8 @@ export type Styles = {
   "modal__wrapper--medium": string;
   "modal__wrapper--pullup": string;
   "modal__wrapper--small": string;
-  "modal--enter": string;
-  "modal--enter-active": string;
+  "modal--appear": string;
+  "modal--appear-active": string;
   "modal--exit": string;
   "modal--exit-active": string;
   "z-depth-0": string;

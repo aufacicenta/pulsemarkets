@@ -11,6 +11,7 @@ export type Styles = {
   "results-modal__outcome-ids-list--item-left": string;
   "results-modal__outcome-ids-list--item-right": string;
   "results-modal__outcome-ids-list--item-winner": string;
+  "results-modal__title": string;
   "z-depth-0": string;
   "z-depth-1": string;
   "z-depth-1-half": string;

@@ -19,7 +19,7 @@ import {
   ModalProps,
 } from "./Modal.types";
 
-export const MODAL_ANIMATION_TIME = 300;
+export const MODAL_ANIMATION_TIME = 2000;
 
 export const Modal = ({
   children,
@@ -67,36 +67,37 @@ export const Modal = ({
   };
 
   const modalElement = (
-    <CSSTransition
-      in={isOpened}
-      timeout={MODAL_ANIMATION_TIME}
-      classNames={{
-        enter: styles["modal--enter"],
-        enterActive: styles["modal--enter-active"],
-        exit: styles["modal--exit"],
-        exitActive: styles["modal--exit-active"],
-      }}
-      unmountOnExit
-      onExited={() => {
-        if (!isOpened && afterClose) {
-          afterClose();
-        }
-      }}
-    >
-      <div role="presentation" className={styles.modal} onKeyDown={handleKeyDown} tabIndex={-1}>
-        <div aria-hidden className={styles.modal__overlay} onClick={onClose} />
-        {withDetachedClose && (
-          <IconButton
-            data-testid="close-modal"
-            className={clsx(styles["modal__close-button--float"])}
-            size="xs"
-            variant="contained"
-            color="secondary"
-            onClick={onClose}
-          >
-            <CloseIcon variant="small" />
-          </IconButton>
-        )}
+    <div role="presentation" className={styles.modal} onKeyDown={handleKeyDown} tabIndex={-1}>
+      <div aria-hidden className={styles.modal__overlay} onClick={onClose} />
+      {withDetachedClose && (
+        <IconButton
+          data-testid="close-modal"
+          className={clsx(styles["modal__close-button--float"])}
+          size="xs"
+          variant="contained"
+          color="secondary"
+          onClick={onClose}
+        >
+          <CloseIcon variant="small" />
+        </IconButton>
+      )}
+      <CSSTransition
+        appear
+        in={isOpened}
+        timeout={MODAL_ANIMATION_TIME}
+        classNames={{
+          appear: styles["modal--appear"],
+          appearActive: styles["modal--appear-active"],
+          exit: styles["modal--exit"],
+          exitActive: styles["modal--exit-active"],
+        }}
+        unmountOnExit
+        onExited={() => {
+          if (!isOpened && afterClose) {
+            afterClose();
+          }
+        }}
+      >
         <div
           role="dialog"
           aria-labelledby={ariaLabelledBy}
@@ -115,8 +116,8 @@ export const Modal = ({
           {withCloseIcon && <CloseButton className={styles["modal__close-button"]} onClick={onClose} />}
           {children}
         </div>
-      </div>
-    </CSSTransition>
+      </CSSTransition>
+    </div>
   );
 
   return createPortal(modalElement, document.querySelector("#modal-root")!);

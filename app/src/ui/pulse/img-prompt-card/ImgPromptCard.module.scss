@@ -1,4 +1,5 @@
 @import "src/theme/base";
+@import "src/ui/typography/mixins";
 
 .img-prompt-card {
   display: block;
@@ -43,7 +44,14 @@
 
   &__status {
     &--winner {
+      @include description;
       color: var(--color-status-warning);
+    }
+
+    &--text {
+      span {
+        @include miniDescription;
+      }
     }
   }
 

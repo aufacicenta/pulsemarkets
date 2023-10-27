@@ -239,6 +239,8 @@ impl Market {
             env::panic_str("ERR_SELF_DESTRUCT_WINDOW_NOT_EXPIRED");
         }
 
+        // @TODO separate these rules and error on each with a specific message
+        // labels: 100 USDT
         if !self.get_outcome_ids().is_empty()
             && !self.fees.claimed_at.is_some()
             && self.collateral_token.fee_balance > 0

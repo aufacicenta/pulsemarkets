@@ -10,9 +10,4 @@ export type PromptWarsProps = {
 
 export type PromptWarsContainerProps = {
   marketId: AccountId;
-  head: {
-    title: string;
-    description: string;
-    url: string;
-  };
 };
