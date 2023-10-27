@@ -27,7 +27,7 @@
   "promptWars.button.submitPrompt.loading": "Submitting",
   "promptWars.button.createNewGame": "Create a new game",
   "promptWars.description.usdt": "USDT",
-  "promptWars.negativePrompt.add": "Add a negative prompt",
+  "promptWars.negativePrompt.add": "Add a negative prompt (things to exclude from image)",
   "promptWars.description.coverStorageFee": "from your wallet. This will cover storage costs and the submission fee.",
   "promptWars.headline.writeNegativePromptHere": "Write your negative prompt here…",
   "promptWars.connectWallet": "Connect Wallet",

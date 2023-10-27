@@ -127,13 +127,14 @@ const Description: React.FC<TypographyProps> = ({ children, className, inline, f
   </p>
 );
 
-const MiniDescription: React.FC<TypographyProps> = ({ children, className, flat, align, ...props }) => (
+const MiniDescription: React.FC<TypographyProps> = ({ children, className, flat, align, inline, ...props }) => (
   <p
     className={clsx(styles["typography__mini-description"], className, {
       [styles.typography__flat]: flat,
       [styles["typography__align--center"]]: align === "center",
       [styles["typography__align--right"]]: align === "right",
       [styles["typography__mini-description--as-button"]]: props.onClick,
+      [styles.typography__inline]: inline,
     })}
     {...props}
   >

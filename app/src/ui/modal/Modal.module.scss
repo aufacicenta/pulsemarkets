@@ -31,7 +31,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(var(--color-back), $opacity-mid);
+    background-color: var(--color-modal-overlay);
+    opacity: var(--opacity-modal-overlay);
   }
 
   button.modal__close-button {
@@ -153,13 +154,15 @@
     }
   }
 
-  &--enter {
+  &--appear {
+    transform: scale(0.9);
     opacity: 0;
   }
 
-  &--enter-active {
+  &--appear-active {
+    transform: translateX(0);
     opacity: 1;
-    transition: opacity $ease-in-out $duration-default;
+    transition: opacity 300ms, transform 300ms;
   }
 
   &--exit {
@@ -168,6 +171,6 @@
 
   &--exit-active {
     opacity: 0;
-    transition: opacity $ease-in-out $duration-default;
+    transition: opacity 300ms, transform 300ms;
   }
 }

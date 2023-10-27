@@ -35,6 +35,7 @@
     "bn.js": "^5.2.0",
     "chart.js": "^3.8.2",
     "chartjs-adapter-moment": "^1.0.0",
+    "clipboard": "^2.0.11",
     "clsx": "^1.1.1",
     "final-form": "^4.20.4",
     "final-form-arrays": "^3.0.2",

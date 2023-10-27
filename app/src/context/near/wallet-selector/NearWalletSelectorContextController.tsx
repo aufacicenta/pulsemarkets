@@ -29,6 +29,7 @@ export const NearWalletSelectorContextController = ({ children }: NearWalletSele
   const walletStateContext = useWalletStateContext();
 
   const routes = useRoutes();
+
   const ls = useLocalStorage();
 
   const initGuestConnection = async (accountId: string) => {
@@ -186,6 +187,10 @@ export const NearWalletSelectorContextController = ({ children }: NearWalletSele
   }, [selector]);
 
   useEffect(() => {
+    if (!selector) {
+      return;
+    }
+
     (async () => {
       try {
         if (ls.get("near_app_wallet_auth_key") !== null) {
@@ -214,6 +219,7 @@ export const NearWalletSelectorContextController = ({ children }: NearWalletSele
         const result = await response.json();
 
         ls.set("near-wallet-selector:selectedWalletId", JSON.stringify("guest-wallet"));
+        ls.set("near-wallet-selector:recentlySignedInWallets", JSON.stringify(["guest-wallet"]));
         ls.set(Object.keys(result)[0], result[Object.keys(result)[0]]);
         ls.set(Object.keys(result)[1], result[Object.keys(result)[1]]);
         ls.set(Object.keys(result)[2], result[Object.keys(result)[2]]);
@@ -232,7 +238,7 @@ export const NearWalletSelectorContextController = ({ children }: NearWalletSele
         }));
       }
     })();
-  }, []);
+  }, [selector]);
 
   const initModal = (contractId: string) => {
     setModal(
