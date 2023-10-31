@@ -497,6 +497,8 @@ mod tests {
         assert_eq!(contract.is_over(), true);
         assert_eq!(contract.is_reveal_window_expired(), true);
         assert_eq!(contract.is_resolution_window_expired(), true);
+        assert_eq!(contract.is_expired_unresolved(), false);
+        assert_eq!(contract.is_resolved(), true);
 
         assert_eq!(contract.get_resolution_data().resolved_at.is_some(), true);
         assert_eq!(contract.get_fee_data().claimed_at.is_some(), false);
