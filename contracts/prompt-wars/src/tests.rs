@@ -414,7 +414,11 @@ mod tests {
         );
 
         contract.claim_fees();
-        contract.on_claim_fees_resolved_callback();
+
+        contract.on_claim_fees_resolved_callback(
+            contract.management.dao_account_id.clone(),
+            contract.collateral_token.fee_balance,
+        );
 
         assert_eq!(contract.get_fee_data().claimed_at.is_some(), true);
 
@@ -453,6 +457,25 @@ mod tests {
             .signer_account_id(market_creator_account_id())
             .build());
 
+        let amount = CREATE_OUTCOME_TOKEN_PRICE;
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+
+        let player_1 = alice();
+
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
+
+        let output_img_uri = "".to_string();
+
+        reveal(&mut contract, player_1.clone(), 0.3, output_img_uri.clone());
+
         resolve(&mut contract);
 
         // now is after the resolution window
@@ -473,12 +496,19 @@ mod tests {
         assert_eq!(contract.is_open(), false);
         assert_eq!(contract.is_over(), true);
         assert_eq!(contract.is_reveal_window_expired(), true);
-        assert_eq!(contract.is_expired_unresolved(), true);
-        assert_eq!(contract.is_resolved(), false);
         assert_eq!(contract.is_resolution_window_expired(), true);
 
         assert_eq!(contract.get_resolution_data().resolved_at.is_some(), true);
         assert_eq!(contract.get_fee_data().claimed_at.is_some(), false);
+
+        contract.claim_fees();
+
+        contract.on_claim_fees_resolved_callback(
+            contract.management.dao_account_id.clone(),
+            contract.collateral_token.fee_balance,
+        );
+
+        assert_eq!(contract.get_fee_data().claimed_at.is_some(), true);
 
         // now is after the self_destruct window
         // called by owner
@@ -711,7 +741,7 @@ mod tests {
         let ends_at = starts_at + Duration::hours(1);
 
         testing_env!(context.block_timestamp(block_timestamp(now)).build());
-      
+
         let market_data: MarketData = create_market_data();
         let mut contract: Market = setup_contract(market_data);
 
@@ -733,7 +763,6 @@ mod tests {
             },
         );
 
-    
         contract.self_destruct();
     }
 
@@ -770,22 +799,20 @@ mod tests {
         let outcome_id = alice();
         let result = 0.3;
         let output_img_uri = "".to_string();
-    
-        reveal(&mut contract, outcome_id, result, output_img_uri.clone());    
+
+        reveal(&mut contract, outcome_id, result, output_img_uri.clone());
 
         // Set the market as resolved
         resolve(&mut contract);
-        
+
         assert_eq!(contract.is_resolved(), true);
 
         let player_2 = bob();
 
-        testing_env!(
-            context
-                .block_timestamp(block_timestamp(now))
-                .signer_account_id(player_2.clone())
-                .build()
-        );
+        testing_env!(context
+            .block_timestamp(block_timestamp(now))
+            .signer_account_id(player_2.clone())
+            .build());
 
         // Attempt to create an outcome token for a player after the market is resolved
         create_outcome_token(
@@ -797,7 +824,6 @@ mod tests {
             },
         );
     }
-
 
     #[test]
     #[should_panic(expected = "ERR_SET_RESULT_ALREADY_SET")]
@@ -833,10 +859,20 @@ mod tests {
         let result = 0.3;
         let output_img_uri = "".to_string();
 
-        reveal(&mut contract, outcome_id.clone(), result, output_img_uri.clone());  
-    
+        reveal(
+            &mut contract,
+            outcome_id.clone(),
+            result,
+            output_img_uri.clone(),
+        );
+
         // Attempt to reveal the result again, which should fail with ERR_SET_RESULT_ALREADY_SET
-        reveal(&mut contract, outcome_id.clone(), 0.5, output_img_uri.clone());  
+        reveal(
+            &mut contract,
+            outcome_id.clone(),
+            0.5,
+            output_img_uri.clone(),
+        );
     }
 
     // @TODO test for ERR_GET_AMOUNT_PAYABLE_UNRESOLVED_INVALID_AMOUNT
@@ -865,13 +901,19 @@ mod tests {
         let mut contract: Market = setup_contract(market_data);
 
         let amount = CREATE_OUTCOME_TOKEN_PRICE;
-        let prompt = json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
+        let prompt =
+            json!({ "value": "a prompt", "negative_prompt": "a negative prompt" }).to_string();
 
         let player_1 = alice();
 
-        create_outcome_token(&mut contract, player_1.clone(), amount, CreateOutcomeTokenArgs {
-            prompt: prompt.clone(),
-        });
+        create_outcome_token(
+            &mut contract,
+            player_1.clone(),
+            amount,
+            CreateOutcomeTokenArgs {
+                prompt: prompt.clone(),
+            },
+        );
 
         now = Utc.timestamp_nanos(contract.get_market_data().ends_at) + Duration::minutes(2);
         testing_env!(context.block_timestamp(block_timestamp(now)).build());
@@ -924,12 +966,11 @@ mod tests {
         let result = 0.3;
         let output_img_uri = "".to_string();
 
-        reveal(&mut contract, outcome_id, result, output_img_uri.clone());    
+        reveal(&mut contract, outcome_id, result, output_img_uri.clone());
 
         // Set the market as resolved
         resolve(&mut contract);
         assert_eq!(contract.is_resolved(), true);
-
 
         now = Utc.timestamp_nanos(contract.get_resolution_data().window) + Duration::minutes(2);
         testing_env!(
@@ -943,7 +984,13 @@ mod tests {
             vec![PromiseResult::Successful(vec![])],
         );
 
-        contract.on_claim_fees_resolved_callback();
+        contract.claim_fees();
+
+        contract.on_claim_fees_resolved_callback(
+            contract.management.dao_account_id.clone(),
+            contract.collateral_token.fee_balance,
+        );
+
         contract.claim_fees();
     }
 }

@@ -28,10 +28,6 @@ export default async function Fn(_request: NextApiRequest, response: NextApiResp
       }
     }, ms);
 
-    // @TODO create a cronjob to call self_destruct contract method at the end of every month
-    // labels: 250 USDT
-    // await PromptWarsMarketContract.selfDestruct(marketId!);
-
     response.status(200).json({ marketId });
   } catch (error) {
     logger.error(error);
