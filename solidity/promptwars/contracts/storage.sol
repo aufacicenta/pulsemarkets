@@ -18,7 +18,7 @@ enum SetPriceOptions {
 
 struct OutcomeToken {
     // the account id of the outcomeToken
-    uint outcomeId;
+    address outcomeId;
     // the outcome value, in this case, the prompt submitted to the competition
     string prompt;
     // the outcome value, in this case, the prompt submitted to the competition
@@ -26,7 +26,7 @@ struct OutcomeToken {
     // store the result from the image comparison: percentageDiff or pixelDifference
     string result;
     // total supply of this outcomeToken
-    uint totalSupply;
+    uint supply;
 }
 
 struct CollateralToken {
