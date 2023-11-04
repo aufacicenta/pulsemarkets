@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./storage.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
@@ -9,17 +8,94 @@ contract Market {
     using Math for uint;
     using SafeCast for uint;
 
+    // ================================================================
+    // |                        STRUCTS                                 |
+    // ================================================================
+
+    struct MarketData {
+        // The IPFS reference-image hash of the expected prompts
+        string imageUri;
+        // Datetime nanos: the market is open
+        uint startsAt;
+        // Datetime nanos: the market is closed
+        uint endsAt;
+    }
+
+    struct OutcomeToken {
+        // the account id of the outcomeToken
+        address outcomeId;
+        // the outcome value, in this case, the prompt submitted to the competition
+        string prompt;
+        // the outcome value, in this case, the prompt submitted to the competition
+        string outputImgUri;
+        // store the result from the image comparison: percentageDiff or pixelDifference
+        string result;
+        // total supply of this outcomeToken
+        uint supply;
+    }
+
+    struct CollateralToken {
+        string id;
+        uint balance;
+        uint decimals;
+        uint feeBalance;
+    }
+
+    struct Resolution {
+        // Time to free up the market
+        uint window;
+        // Time after the market ends and before the resolution window starts
+        uint revealWindow;
+        // When the market is resolved, set only by fn resolve
+        uint resolvedAt;
+        // When the market is resolved, set only by fn resolve
+        uint result;
+    }
+
+    struct Management {
+        // Gets sent fees when claiming window is open
+        string daoAccountId;
+        // Gets back the storage deposit upon self-destruction
+        string marketCreatorAccountId;
+        // Set at initialization, the market may be destroyed by the creator to claim the storage deposit
+        uint selfDestructWindow;
+        // Set at initialization, determines when to close bets
+        uint buySellThreshold;
+    }
+
+    struct Fees {
+        // Price to charge when creating an outcome token
+        uint price;
+        // Decimal fee to charge upon a bet
+        uint feeRatio;
+        // When fees got sent to the DAO
+        uint claimedAt;
+    }
+
+    struct CreateOutcomeTokenArgs {
+        // the outcome value, in this case, the prompt submitted to the competition
+        string prompt;
+    }
+
+    // ================================================================
+    // |                            STATE                             |
+    // ================================================================
+
     mapping(address => OutcomeToken) outcomeTokens;
     address[] public players;
 
-    MarketData market;
-    Management management;
-    CollateralToken collateralToken;
-    Fees fees;
-    Resolution resolution;
+    MarketData private _market;
+    Resolution private _resolution;
+    Fees private _fees;
+    Management private _management;
+    CollateralToken private _collateralToken;
+
+    // ================================================================
+    // |                        MODIFIERS                             |
+    // ================================================================
 
     modifier assertIsOpen() {
-        require(block.timestamp >= market.startsAt, "ERR_MARKET_NOT_OPEN");
+        require(block.timestamp >= _market.startsAt, "ERR_MARKET_NOT_OPEN");
         _;
     }
 
@@ -29,15 +105,23 @@ contract Market {
     }
 
     modifier assertPrice(uint amount) {
-        require(amount >= fees.price, "ERR_ASSERT_PRICE_INSUFFICIENT_AMOUNT");
+        require(amount >= _fees.price, "ERR_ASSERT_PRICE_INSUFFICIENT_AMOUNT");
         _;
     }
+
+    // ================================================================
+    // |                        CONSTANTS                             |
+    // ================================================================
 
     uint constant EVENT_PERIOD_NANOS = 5 minutes;
     uint constant STAGE_PERIOD_NANOS = 5 minutes;
     uint constant CREATE_OUTCOME_TOKEN_PRICE = 10_000;
     uint constant FEE_RATIO = 20_000_000;
     uint constant BUY_SELL_THRESHOLD = 75;
+
+    // ================================================================
+    // |                          Events                              |
+    // ================================================================
 
     event CreateOutcomeToken(
         uint amount,
@@ -47,10 +131,14 @@ contract Market {
         uint collateralTokenFeeBalance
     );
 
+    // ================================================================
+    // |                          PUBLIC                              |
+    // ================================================================
+
     constructor(
-        MarketData memory _market,
-        Management memory _management,
-        CollateralToken memory _collateralToken
+        MarketData memory market,
+        Management memory management,
+        CollateralToken memory collateralToken
     ) {
         uint endsAt;
         uint revealWindow;
@@ -64,26 +152,23 @@ contract Market {
 
         (, selfDestructWindow) = resolutionWindow.tryAdd(7 days);
 
-        _market.startsAt = startsAt;
-        _market.endsAt = endsAt;
-        market = _market;
+        market.startsAt = startsAt;
+        market.endsAt = endsAt;
+        market = market;
 
-        uint buySellThreshold;
+        management.selfDestructWindow = selfDestructWindow;
+        management.buySellThreshold = BUY_SELL_THRESHOLD;
+        _management = management;
 
-        _management.selfDestructWindow = selfDestructWindow;
-        (, buySellThreshold) = BUY_SELL_THRESHOLD.tryDiv(100);
-        _management.buySellThreshold = buySellThreshold;
-        management = _management;
+        collateralToken.balance = 0;
+        collateralToken.feeBalance = 0;
+        _collateralToken = collateralToken;
 
-        _collateralToken.balance = 0;
-        _collateralToken.feeBalance = 0;
-        collateralToken = _collateralToken;
+        _resolution.window = resolutionWindow;
+        _resolution.revealWindow = revealWindow;
 
-        resolution.window = resolutionWindow;
-        resolution.revealWindow = revealWindow;
-
-        fees.price = CREATE_OUTCOME_TOKEN_PRICE;
-        fees.feeRatio = FEE_RATIO;
+        _fees.price = CREATE_OUTCOME_TOKEN_PRICE;
+        _fees.feeRatio = FEE_RATIO;
     }
 
     function create_outcome_token(
@@ -111,28 +196,69 @@ contract Market {
 
         outcomeTokens[senderId] = outcomeToken;
 
-        collateralToken.balance += amount;
-        collateralToken.feeBalance += fee;
+        _collateralToken.balance += amount;
+        _collateralToken.feeBalance += fee;
 
         emit CreateOutcomeToken(
             amount,
             senderId,
             outcomeToken.supply,
-            collateralToken.balance,
-            collateralToken.feeBalance
+            _collateralToken.balance,
+            _collateralToken.feeBalance
         );
     }
 
+    // ================================================================
+    // |                        Public VIEWS                          |
+    // ================================================================
+
+    function get_market_data() public view returns (MarketData memory) {
+        return _market;
+    }
+
+    function get_resolution_data() public view returns (Resolution memory) {
+        return _resolution;
+    }
+
+    function get_fees_data() public view returns (Fees memory) {
+        return _fees;
+    }
+
+    function get_management_data() public view returns (Management memory) {
+        return _management;
+    }
+
+    function get_collateral_token_data()
+        public
+        view
+        returns (CollateralToken memory)
+    {
+        return _collateralToken;
+    }
+
+    // ================================================================
+    // |                        PRIVATE                               |
+    // ================================================================
+
     function _is_resolved() private view returns (bool) {
-        return resolution.resolvedAt != 0;
+        return _resolution.resolvedAt != 0;
     }
 
     function _get_amount_mintable(
         uint amount
     ) private view returns (uint, uint) {
-        uint fee = (amount * fees.feeRatio) / 100;
+        uint fee = (amount * _fees.feeRatio) / 100;
         uint amountMintable = amount - fee;
 
         return (amountMintable, fee);
+    }
+
+    function _calculate_percentage(
+        uint256 amount,
+        uint256 bps
+    ) private pure returns (uint256) {
+        require((amount * bps) >= 10_000);
+
+        return (amount * bps) / 10_000;
     }
 }
