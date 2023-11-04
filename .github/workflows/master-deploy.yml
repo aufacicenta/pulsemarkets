@@ -9,10 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      NEAR_AMM_FACTORY_ACCOUNT_ID: ${{ secrets.NEAR_AMM_FACTORY_ACCOUNT_ID }}
-      APP_URL: ${{ secrets.APP_URL }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -23,34 +19,8 @@ jobs:
           node-version: 18
       - run: npm install -g yarn
 
-      - name: Install near-cli
-        run: npm install -g near-cli
-
       - name: Make the script files executable
-        run: chmod +x ./contracts/market-factory/build.sh ./contracts/prompt-wars/build.sh
+        run: chmod +x ./app/deploy.sh
 
       - name: Run the scripts
-        run: |
-          ./contracts/market-factory/build.sh
-          ./contracts/prompt-wars/build.sh
-
-      - name: Deploy NEAR Contracts
-        run: |
-          near deploy --wasmFile target/wasm32-unknown-unknown/release/market_factory.wasm --accountId $NEAR_AMM_FACTORY_ACCOUNT_ID
-          near call market-factory.pulsemarkets.testnet new --accountId pulsemarkets.testnet
-
-      - name: Install Dependencies of Next Js App
-        shell: bash
-        run: yarn prod:install
-
-      - name: Build NextJS App
-        shell: bash
-        run: yarn prod:build
-
-      - name: Deploy Next JS App
-        #   TODO
-        run:
-
-      - name: Cleanup
-        run: |
-          # Perform any cleanup tasks
+        run: ./app/deploy.sh
