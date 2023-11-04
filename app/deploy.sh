@@ -8,7 +8,7 @@ source  ../../.env
 
 
 APP_NAME="pulsemarkets"  #pm2 handle for the process
-APP_DIR="/var/www/$APP_NAME"    
+APP_DIR="/var/www/$APP_NAME/app"    
 REPO="git@github.com:aufacicenta/pulsemarkets.git" #put link to your own repo here
 BRANCH="master" #or staging, dev, etc.
 ENV="production" #or staging or local.  defaults to production
