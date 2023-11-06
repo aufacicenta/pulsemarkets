@@ -17,6 +17,8 @@ import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars
 import { PromptInputCardProps } from "./PromptInputCard.types";
 import styles from "./PromptInputCard.module.scss";
 
+// @TODO Render the result of the prompt real-time to make it more competitive
+// labels: 250 USDT, P1
 export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   onSubmit,
   className,
@@ -39,6 +41,9 @@ export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   };
 
   const { t } = useTranslation(["prompt-wars"]);
+
+  // @TODO Add an AI Model selector dropdown that lets users choose which model to use
+  // labels: 350 USDT, P1
 
   return (
     <RFForm
