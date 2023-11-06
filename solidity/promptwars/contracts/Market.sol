@@ -137,6 +137,13 @@ contract Market is Ownable {
     // |                          PUBLIC                              |
     // ================================================================
 
+    /**
+     * @notice Constructs a new Market contract.
+     * @dev Contract deployment involves a series of initializations including market dates, management parameters, collateral balance, resolution timing, and fees.
+     * @param market An instance of the MarketData struct that contains the attributes of the market such as the image URI and the start and end timings.
+     * @param management An instance of the Management struct that contains fields necessary for managing the contract such as the DAO account ID, the creator account ID, the window to self-destruct, and the threshold to determine when to close bets.
+     * @param collateralToken An instance of the CollateralToken struct that contains token-related data such as the token id, its balance, decimals, and the fee balance.
+     */
     constructor(
         MarketData memory market,
         Management memory management,
@@ -173,6 +180,12 @@ contract Market is Ownable {
         _fees.feeRatio = FEE_RATIO;
     }
 
+    /**
+     * @notice This function is used to create a new outcome token. An outcome token represents a player's entry into the competition.
+     * @param amount The amount of collateral to use for creating the outcome token. This amount must be equal to or greater than the fee required for creating an outcome token.
+     * @param playerId The address of the account creating the outcome token. This address is also used as the account id of the created outcome token.
+     * @param prompt A string value representing the prompt submitted to the competition. This becomes the outcome value of the created outcome token.
+     */
     function create_outcome_token(
         uint amount,
         address playerId,
@@ -214,22 +227,37 @@ contract Market is Ownable {
     // |                        Public VIEWS                          |
     // ================================================================
 
+    /**
+     * @return The market data of the contract.
+     */
     function get_market_data() public view returns (MarketData memory) {
         return _market;
     }
 
+    /**
+     * @return The resolution data of the contract.
+     */
     function get_resolution_data() public view returns (Resolution memory) {
         return _resolution;
     }
 
+    /**
+     * @return The fees data of the contract.
+     */
     function get_fees_data() public view returns (Fees memory) {
         return _fees;
     }
 
+    /**
+     * @return The management data of the contract.
+     */
     function get_management_data() public view returns (Management memory) {
         return _management;
     }
 
+    /**
+     * @return The collateral token data of the contract.
+     */
     function get_collateral_token_data()
         public
         view
@@ -238,6 +266,10 @@ contract Market is Ownable {
         return _collateralToken;
     }
 
+    /**
+     * @param playerId The player's address.
+     * @return The outcome token data of a specified player.
+     */
     function get_outcome_token(
         address playerId
     ) public view returns (OutcomeToken memory) {
@@ -245,10 +277,13 @@ contract Market is Ownable {
             address(outcomeTokens[playerId].outcomeId) != address(0),
             "ERR_INVALID_OUTCOME_ID"
         );
-
         return outcomeTokens[playerId];
     }
 
+    /**
+     * @param amount The amount to be minted.
+     * @return The amount of mintable tokens and the fee.
+     */
     function get_amount_mintable(uint amount) public view returns (uint, uint) {
         uint fee = _calculate_percentage(amount, _fees.feeRatio);
         uint amountMintable = amount - fee;
@@ -256,6 +291,9 @@ contract Market is Ownable {
         return (amountMintable, fee);
     }
 
+    /**
+     * @return The total number of players.
+     */
     function get_players_count() public view returns (uint256) {
         return _players.length;
     }
@@ -264,14 +302,26 @@ contract Market is Ownable {
     // |                        PRIVATE                               |
     // ================================================================
 
+    /**
+     * @notice Check if the contract is resolved.
+     * @dev Compares current timestamp with resolution window.
+     * @return bool Whether the contract is resolved or not.
+     */
     function _is_resolved() private view returns (bool) {
         return _resolution.resolvedAt != 0;
     }
 
+    /**
+     * @notice Calculate percentage of amount.
+     * @dev Used for calculating fees and other percentage based calculations.
+     * @param amount The base amount.
+     * @param bps Basis Points. The percentage.
+     * @return uint The calculated amount after applying the percentage.
+     */
     function _calculate_percentage(
-        uint256 amount,
-        uint256 bps
-    ) private pure returns (uint256) {
+        uint amount,
+        uint bps
+    ) private pure returns (uint) {
         require((amount * bps) >= 10_000);
 
         return (amount * bps) / 10_000;
