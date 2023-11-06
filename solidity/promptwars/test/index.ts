@@ -1,33 +1,41 @@
+/* eslint-disable node/no-unsupported-features/es-builtins */
 /* eslint-disable no-unused-expressions */
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { BigNumber } from "ethers";
+import { ethers, network } from "hardhat";
 
 const DAO_ACCOUNT_ID = "dao_account.eth";
 const MARKET_CREATOR_ACCOUNT_ID = "creator.eth";
 const COLLATERAL_TOKEN_ACCOUNT_ID = "usdt.eth";
+const SENDER_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+
+async function createMarketContract() {
+  const Market = await ethers.getContractFactory("Market");
+
+  const _market = { imageUri: "", startsAt: 0, endsAt: 0 };
+
+  const _management = {
+    daoAccountId: DAO_ACCOUNT_ID,
+    marketCreatorAccountId: MARKET_CREATOR_ACCOUNT_ID,
+    selfDestructWindow: 0,
+    buySellThreshold: 0,
+  };
+
+  const _collateralToken = {
+    id: COLLATERAL_TOKEN_ACCOUNT_ID,
+    balance: 0,
+    decimals: 0,
+    feeBalance: 0,
+  };
+
+  const market = await Market.deploy(_market, _management, _collateralToken);
+
+  return market.deployed();
+}
 
 describe("Market", function () {
   it("Initialize: call constructor", async function () {
-    const Market = await ethers.getContractFactory("Market");
-
-    const _market = { imageUri: "", startsAt: 0, endsAt: 0 };
-
-    const _management = {
-      daoAccountId: DAO_ACCOUNT_ID,
-      marketCreatorAccountId: MARKET_CREATOR_ACCOUNT_ID,
-      selfDestructWindow: 0,
-      buySellThreshold: 0,
-    };
-
-    const _collateralToken = {
-      id: COLLATERAL_TOKEN_ACCOUNT_ID,
-      balance: 0,
-      decimals: 0,
-      feeBalance: 0,
-    };
-
-    const market = await Market.deploy(_market, _management, _collateralToken);
-    await market.deployed();
+    const market = await createMarketContract();
 
     const marketData = await market.get_market_data();
 
@@ -61,7 +69,7 @@ describe("Market", function () {
     const [price, feeRatio, claimedAt] = feesData;
 
     expect(price.toString()).to.equal("10000");
-    expect(feeRatio.toString()).to.equal("20000000");
+    expect(feeRatio.toString()).to.equal("20");
     expect(claimedAt.toString()).to.equal("0");
 
     const managementData = await market.get_management_data();
@@ -90,5 +98,46 @@ describe("Market", function () {
     expect(balance.toString()).to.equal("0");
     expect(decimals.toString()).to.equal("0");
     expect(feeBalance.toString()).to.equal("0");
+  });
+
+  it("create_outcome_token: should create token and emit event", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+    const [amountMintable, fee] = await market.get_amount_mintable(amount);
+
+    const collateralTokenBalance = amount;
+    const collateralTokenFeeBalance = fee;
+
+    // console.log({ amountMintable, fee });
+
+    const playerId = await ethers.getSigner(network.config.from!);
+
+    await expect(market.create_outcome_token(amount, playerId.address, prompt))
+      .to.emit(market, "CreateOutcomeToken")
+      .withArgs(
+        amount,
+        playerId.address,
+        amountMintable,
+        fee,
+        collateralTokenBalance,
+        collateralTokenFeeBalance
+      );
+
+    const outcomeToken = await market.get_outcome_token(playerId.address);
+
+    expect(outcomeToken.outcomeId).to.equal(playerId.address);
+    expect(outcomeToken.prompt).to.equal(prompt);
+    expect(outcomeToken.supply).to.equal(amountMintable);
+
+    const collateralTokenData = await market.get_collateral_token_data();
+
+    expect(collateralTokenData.balance.toString()).to.equal(amount.toString());
+    expect(collateralTokenData.feeBalance.toString()).to.equal(fee.toString());
+
+    const playersCount = await market.get_players_count();
+    expect(playersCount).to.equal(1);
   });
 });

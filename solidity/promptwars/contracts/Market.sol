@@ -3,8 +3,9 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Market {
+contract Market is Ownable {
     using Math for uint;
     using SafeCast for uint;
 
@@ -82,7 +83,7 @@ contract Market {
     // ================================================================
 
     mapping(address => OutcomeToken) outcomeTokens;
-    address[] public players;
+    address[] private _players;
 
     MarketData private _market;
     Resolution private _resolution;
@@ -116,7 +117,7 @@ contract Market {
     uint constant EVENT_PERIOD_NANOS = 5 minutes;
     uint constant STAGE_PERIOD_NANOS = 5 minutes;
     uint constant CREATE_OUTCOME_TOKEN_PRICE = 10_000;
-    uint constant FEE_RATIO = 20_000_000;
+    uint constant FEE_RATIO = 20;
     uint constant BUY_SELL_THRESHOLD = 75;
 
     // ================================================================
@@ -127,6 +128,7 @@ contract Market {
         uint amount,
         address outcomeId,
         uint supply,
+        uint fee,
         uint collateralTokenBalance,
         uint collateralTokenFeeBalance
     );
@@ -139,7 +141,7 @@ contract Market {
         MarketData memory market,
         Management memory management,
         CollateralToken memory collateralToken
-    ) {
+    ) Ownable(msg.sender) {
         uint endsAt;
         uint revealWindow;
         uint resolutionWindow;
@@ -173,11 +175,10 @@ contract Market {
 
     function create_outcome_token(
         uint amount,
+        address playerId,
         string memory prompt
-    ) public assertIsOpen assertIsNotResolved assertPrice(amount) {
-        address senderId = msg.sender;
-
-        OutcomeToken storage outcomeToken = outcomeTokens[senderId];
+    ) public onlyOwner assertIsOpen assertIsNotResolved assertPrice(amount) {
+        OutcomeToken storage outcomeToken = outcomeTokens[playerId];
 
         require(
             address(outcomeToken.outcomeId) == address(0),
@@ -186,23 +187,24 @@ contract Market {
 
         uint amountMintable;
         uint fee;
-        (amountMintable, fee) = _get_amount_mintable(amount);
+        (amountMintable, fee) = get_amount_mintable(amount);
 
-        outcomeToken.outcomeId = senderId;
+        outcomeToken.outcomeId = playerId;
         outcomeToken.prompt = prompt;
         outcomeToken.supply = amountMintable;
 
-        players.push(senderId);
+        _players.push(playerId);
 
-        outcomeTokens[senderId] = outcomeToken;
+        outcomeTokens[playerId] = outcomeToken;
 
         _collateralToken.balance += amount;
         _collateralToken.feeBalance += fee;
 
         emit CreateOutcomeToken(
             amount,
-            senderId,
+            playerId,
             outcomeToken.supply,
+            fee,
             _collateralToken.balance,
             _collateralToken.feeBalance
         );
@@ -236,21 +238,34 @@ contract Market {
         return _collateralToken;
     }
 
+    function get_outcome_token(
+        address playerId
+    ) public view returns (OutcomeToken memory) {
+        require(
+            address(outcomeTokens[playerId].outcomeId) != address(0),
+            "ERR_INVALID_OUTCOME_ID"
+        );
+
+        return outcomeTokens[playerId];
+    }
+
+    function get_amount_mintable(uint amount) public view returns (uint, uint) {
+        uint fee = _calculate_percentage(amount, _fees.feeRatio);
+        uint amountMintable = amount - fee;
+
+        return (amountMintable, fee);
+    }
+
+    function get_players_count() public view returns (uint256) {
+        return _players.length;
+    }
+
     // ================================================================
     // |                        PRIVATE                               |
     // ================================================================
 
     function _is_resolved() private view returns (bool) {
         return _resolution.resolvedAt != 0;
-    }
-
-    function _get_amount_mintable(
-        uint amount
-    ) private view returns (uint, uint) {
-        uint fee = (amount * _fees.feeRatio) / 100;
-        uint amountMintable = amount - fee;
-
-        return (amountMintable, fee);
     }
 
     function _calculate_percentage(
