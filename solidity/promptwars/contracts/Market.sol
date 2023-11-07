@@ -96,12 +96,7 @@ contract Market is Ownable {
     // ================================================================
 
     modifier assertBeforeEnd() {
-        require(block.timestamp <= _market.endsAt, "ERR_EVENT_ENDED");
-        _;
-    }
-
-    modifier assertIsOpen() {
-        require(block.timestamp >= _market.startsAt, "ERR_EVENT_IS_NOT_OPEN");
+        require(_is_before_market_ends(), "ERR_EVENT_ENDED");
         _;
     }
 
@@ -110,8 +105,23 @@ contract Market is Ownable {
         _;
     }
 
+    modifier assertIsRevealWindowOpen() {
+        require(!_is_reveal_window_open(), "ERR_REVEAL_WINDOW_EXPIRED");
+        _;
+    }
+
     modifier assertPrice(uint amount) {
         require(amount >= _fees.price, "ERR_ASSERT_PRICE_INSUFFICIENT_AMOUNT");
+        _;
+    }
+
+    modifier assertIsPlayerRegistered(address playerId) {
+        require(_player_exists(playerId), "ERR_PLAYER_IS_NOT_REGISTERED");
+        _;
+    }
+
+    modifier assertPlayerIsNotRegistered(address playerId) {
+        require(!_player_exists(playerId), "ERR_PLAYER_EXISTS");
         _;
     }
 
@@ -119,8 +129,9 @@ contract Market is Ownable {
     // |                        CONSTANTS                             |
     // ================================================================
 
-    uint constant EVENT_PERIOD_NANOS = 5 minutes;
-    uint constant STAGE_PERIOD_NANOS = 5 minutes;
+    uint constant EVENT_PERIOD_TIMESTAMP = 5 minutes;
+    uint constant STAGE_PERIOD_TIMESTAMP = 5 minutes;
+    uint constant SELF_DESTRUCT_TIMESTAMP = 7 days;
     uint constant CREATE_OUTCOME_TOKEN_PRICE = 10_000;
     uint constant FEE_RATIO = 20;
     uint constant BUY_SELL_THRESHOLD = 75;
@@ -136,6 +147,12 @@ contract Market is Ownable {
         uint fee,
         uint collateralTokenBalance,
         uint collateralTokenFeeBalance
+    );
+
+    event RevealPlayerResult(
+        address playerId,
+        string result,
+        string outputImgUri
     );
 
     // ================================================================
@@ -154,15 +171,11 @@ contract Market is Ownable {
         Management memory management,
         CollateralToken memory collateralToken
     ) Ownable(msg.sender) {
-        uint resolutionWindow;
-        uint selfDestructWindow;
-
         uint startsAt = market.startsAt;
-        uint endsAt = startsAt + EVENT_PERIOD_NANOS;
-        uint revealWindow = endsAt + STAGE_PERIOD_NANOS;
-        (, resolutionWindow) = revealWindow.tryAdd(STAGE_PERIOD_NANOS);
-
-        (, selfDestructWindow) = resolutionWindow.tryAdd(7 days);
+        uint endsAt = startsAt + EVENT_PERIOD_TIMESTAMP;
+        uint revealWindow = endsAt + STAGE_PERIOD_TIMESTAMP;
+        uint resolutionWindow = revealWindow + STAGE_PERIOD_TIMESTAMP;
+        uint selfDestructWindow = resolutionWindow + SELF_DESTRUCT_TIMESTAMP;
 
         market.startsAt = startsAt;
         market.endsAt = endsAt;
@@ -193,13 +206,14 @@ contract Market is Ownable {
         uint amount,
         address playerId,
         string memory prompt
-    ) public onlyOwner assertBeforeEnd assertPrice(amount) {
+    )
+        public
+        onlyOwner
+        assertPlayerIsNotRegistered(playerId)
+        assertBeforeEnd
+        assertPrice(amount)
+    {
         Player storage player = players[playerId];
-
-        require(
-            address(player.id) == address(0),
-            "ERR_REGISTER_PLAYER_PLAYER_EXISTS"
-        );
 
         uint amountMintable;
         uint fee;
@@ -224,6 +238,31 @@ contract Market is Ownable {
             _collateralToken.balance,
             _collateralToken.feeBalance
         );
+    }
+
+    /**
+     * @notice This function is used to reveal a player's result.
+     * @param playerId The ID of the player to reveal the result for.
+     * @param result The player's result.
+     * @param outputImgUri The output image URI of the player.
+     */
+    function reveal(
+        address playerId,
+        string memory result,
+        string memory outputImgUri
+    )
+        public
+        onlyOwner
+        assertIsRevealWindowOpen
+        assertIsPlayerRegistered(playerId)
+        assertIsNotResolved
+    {
+        Player storage player = players[playerId];
+
+        player.result = result;
+        player.outputImgUri = outputImgUri;
+
+        emit RevealPlayerResult(playerId, result, outputImgUri);
     }
 
     // ================================================================
@@ -317,6 +356,18 @@ contract Market is Ownable {
      */
     function _is_resolved() private view returns (bool) {
         return _resolution.resolvedAt != 0;
+    }
+
+    function _is_before_market_ends() private view returns (bool) {
+        return block.timestamp <= _market.endsAt;
+    }
+
+    function _is_reveal_window_open() private view returns (bool) {
+        return block.timestamp > _resolution.revealWindow;
+    }
+
+    function _player_exists(address playerId) private view returns (bool) {
+        return address(players[playerId].id) != address(0);
     }
 
     /**

@@ -166,7 +166,7 @@ describe("Market", function () {
 
     await expect(
       market.register_player(amount, playerId.address, prompt)
-    ).to.be.revertedWith("ERR_REGISTER_PLAYER_PLAYER_EXISTS");
+    ).to.be.revertedWith("ERR_PLAYER_EXISTS");
   });
 
   it("register_player: error on onlyOwner modifier", async () => {
@@ -241,5 +241,67 @@ describe("Market", function () {
     await expect(
       market.register_player(amount, playerId.address, prompt)
     ).to.be.revertedWith("ERR_ASSERT_PRICE_INSUFFICIENT_AMOUNT");
+  });
+
+  it("reveal: error on onlyOwner modifier", async () => {
+    const market = await createMarketContract();
+
+    const result = "Sample Result";
+    const outputImgUri = "outputImgUri";
+
+    const nonOwner = ethers.Wallet.createRandom();
+
+    const playerId = ethers.Wallet.createRandom();
+
+    try {
+      await market.connect(nonOwner);
+      market.reveal(playerId.address, result, outputImgUri);
+    } catch (error) {
+      expect((error as Error).message).to.match(/code=UNSUPPORTED_OPERATION?/);
+    }
+  });
+
+  it("reveal: error on assertIsRevealWindowOpen modifier", async () => {
+    const blockTimestamp = await getBlockTimestamp();
+    const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
+
+    const market = await createMarketContract({ market: { startsAt } });
+
+    const [, revealWindow] = await market.get_resolution_data();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(revealWindow.toNumber()).add(1, "minute").unix(),
+    ]);
+
+    const result = "Sample Result";
+    const outputImgUri = "outputImgUri";
+
+    await expect(
+      market.reveal(playerId.address, result, outputImgUri)
+    ).to.be.revertedWith("ERR_REVEAL_WINDOW_EXPIRED");
+  });
+
+  it("reveal: error on assertIsPlayerRegistered modifier", async () => {
+    const blockTimestamp = await getBlockTimestamp();
+    const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
+
+    const market = await createMarketContract({ market: { startsAt } });
+
+    const playerId = ethers.Wallet.createRandom();
+
+    const result = "Sample Result";
+    const outputImgUri = "outputImgUri";
+
+    await expect(
+      market.reveal(playerId.address, result, outputImgUri)
+    ).to.be.revertedWith("ERR_PLAYER_IS_NOT_REGISTERED");
   });
 });
