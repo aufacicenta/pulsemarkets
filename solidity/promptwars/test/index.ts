@@ -226,4 +226,20 @@ describe("Market", function () {
       market.register_player(amount, playerId.address, prompt)
     ).to.be.revertedWith("ERR_EVENT_ENDED");
   });
+
+  it("register_player: error on assertPrice modifier", async () => {
+    const market = await createMarketContract();
+
+    const [price] = await market.get_fees_data();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(price.toNumber() - 1000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await expect(
+      market.register_player(amount, playerId.address, prompt)
+    ).to.be.revertedWith("ERR_ASSERT_PRICE_INSUFFICIENT_AMOUNT");
+  });
 });

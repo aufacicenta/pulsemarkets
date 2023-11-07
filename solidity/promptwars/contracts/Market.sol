@@ -193,7 +193,7 @@ contract Market is Ownable {
         uint amount,
         address playerId,
         string memory prompt
-    ) public onlyOwner assertBeforeEnd assertIsNotResolved assertPrice(amount) {
+    ) public onlyOwner assertBeforeEnd assertPrice(amount) {
         Player storage player = players[playerId];
 
         require(
