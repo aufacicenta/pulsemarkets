@@ -32,7 +32,7 @@ contract Market is Ownable {
         // store the result from the image comparison: percentageDiff or pixelDifference
         string result;
         // total supply of this outcomeToken
-        uint supply;
+        uint balance;
     }
 
     struct CollateralToken {
@@ -50,7 +50,7 @@ contract Market is Ownable {
         // When the market is resolved, set only by fn resolve
         uint resolvedAt;
         // When the market is resolved, set only by fn resolve
-        uint result;
+        address playerId;
     }
 
     struct Management {
@@ -100,6 +100,11 @@ contract Market is Ownable {
         _;
     }
 
+    modifier assertEnoughParticipants() {
+        require(_playerIds.length > 0, "ERR_RESOLVE_0_PARTICIPANTS");
+        _;
+    }
+
     modifier assertIsNotResolved() {
         require(!_is_resolved(), "ERR_EVENT_IS_RESOLVED");
         _;
@@ -107,6 +112,11 @@ contract Market is Ownable {
 
     modifier assertIsRevealWindowOpen() {
         require(!_is_reveal_window_open(), "ERR_REVEAL_WINDOW_EXPIRED");
+        _;
+    }
+
+    modifier assertIsResolutionWindowOpen() {
+        require(!_is_resolution_window_open(), "ERR_RESOLUTION_WINDOW_EXPIRED");
         _;
     }
 
@@ -150,6 +160,12 @@ contract Market is Ownable {
     );
 
     event RevealPlayerResult(
+        address playerId,
+        string result,
+        string outputImgUri
+    );
+
+    event ResolutionSuccess(
         address playerId,
         string result,
         string outputImgUri
@@ -221,7 +237,7 @@ contract Market is Ownable {
 
         player.id = playerId;
         player.prompt = prompt;
-        player.supply = amountMintable;
+        player.balance = amountMintable;
 
         _playerIds.push(playerId);
 
@@ -233,7 +249,7 @@ contract Market is Ownable {
         emit RegisterPlayer(
             amount,
             playerId,
-            player.supply,
+            player.balance,
             fee,
             _collateralToken.balance,
             _collateralToken.feeBalance
@@ -263,6 +279,27 @@ contract Market is Ownable {
         player.outputImgUri = outputImgUri;
 
         emit RevealPlayerResult(playerId, result, outputImgUri);
+    }
+
+    function resolve(
+        address playerId
+    )
+        public
+        onlyOwner
+        assertEnoughParticipants
+        assertIsResolutionWindowOpen
+        assertIsNotResolved
+        assertIsPlayerRegistered(playerId)
+    {
+        _resolution.playerId = playerId;
+        _resolution.resolvedAt = block.timestamp;
+
+        Player storage player = players[playerId];
+
+        string memory result = player.result;
+        string memory outputImgUri = player.outputImgUri;
+
+        emit ResolutionSuccess(playerId, result, outputImgUri);
     }
 
     // ================================================================
@@ -364,6 +401,10 @@ contract Market is Ownable {
 
     function _is_reveal_window_open() private view returns (bool) {
         return block.timestamp > _resolution.revealWindow;
+    }
+
+    function _is_resolution_window_open() private view returns (bool) {
+        return block.timestamp > _resolution.window;
     }
 
     function _player_exists(address playerId) private view returns (bool) {

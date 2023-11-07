@@ -67,12 +67,15 @@ describe("Market", function () {
 
     expect(resolutionData).to.have.lengthOf(4);
 
-    const [resolutionWindow, revealWindow, resolvedAt, result] = resolutionData;
+    const [resolutionWindow, revealWindow, resolvedAt, playerId] =
+      resolutionData;
 
     expect(resolutionWindow.toString()).to.not.be.null;
     expect(revealWindow.toString()).to.not.be.null;
     expect(resolvedAt.toString()).to.equal("0");
-    expect(result.toString()).to.equal("0");
+    expect(playerId.toString()).to.equal(
+      "0x0000000000000000000000000000000000000000"
+    );
 
     const feesData = await market.get_fees_data();
 
@@ -110,47 +113,6 @@ describe("Market", function () {
     expect(balance.toString()).to.equal("0");
     expect(decimals.toString()).to.equal("0");
     expect(feeBalance.toString()).to.equal("0");
-  });
-
-  it("register_player: should create token and emit event", async () => {
-    const market = await createMarketContract();
-
-    const prompt = "Sample Prompt";
-
-    const amount = BigNumber.from(120_000);
-    const [amountMintable, fee] = await market.get_amount_mintable(amount);
-
-    const collateralTokenBalance = amount;
-    const collateralTokenFeeBalance = fee;
-
-    // console.log({ amountMintable, fee });
-
-    const playerId = ethers.Wallet.createRandom();
-
-    await expect(market.register_player(amount, playerId.address, prompt))
-      .to.emit(market, "RegisterPlayer")
-      .withArgs(
-        amount,
-        playerId.address,
-        amountMintable,
-        fee,
-        collateralTokenBalance,
-        collateralTokenFeeBalance
-      );
-
-    const player = await market.get_player(playerId.address);
-
-    expect(player.id).to.equal(playerId.address);
-    expect(player.prompt).to.equal(prompt);
-    expect(player.supply).to.equal(amountMintable);
-
-    const collateralTokenData = await market.get_collateral_token_data();
-
-    expect(collateralTokenData.balance.toString()).to.equal(amount.toString());
-    expect(collateralTokenData.feeBalance.toString()).to.equal(fee.toString());
-
-    const playersCount = await market.get_players_count();
-    expect(playersCount).to.equal(1);
   });
 
   it("register_player: error on duplicate player address", async () => {
@@ -243,6 +205,47 @@ describe("Market", function () {
     ).to.be.revertedWith("ERR_ASSERT_PRICE_INSUFFICIENT_AMOUNT");
   });
 
+  it("register_player: should create token and emit RegisterPlayer event", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+    const [amountMintable, fee] = await market.get_amount_mintable(amount);
+
+    const collateralTokenBalance = amount;
+    const collateralTokenFeeBalance = fee;
+
+    // console.log({ amountMintable, fee });
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await expect(market.register_player(amount, playerId.address, prompt))
+      .to.emit(market, "RegisterPlayer")
+      .withArgs(
+        amount,
+        playerId.address,
+        amountMintable,
+        fee,
+        collateralTokenBalance,
+        collateralTokenFeeBalance
+      );
+
+    const player = await market.get_player(playerId.address);
+
+    expect(player.id).to.equal(playerId.address);
+    expect(player.prompt).to.equal(prompt);
+    expect(player.balance).to.equal(amountMintable);
+
+    const collateralTokenData = await market.get_collateral_token_data();
+
+    expect(collateralTokenData.balance.toString()).to.equal(amount.toString());
+    expect(collateralTokenData.feeBalance.toString()).to.equal(fee.toString());
+
+    const playersCount = await market.get_players_count();
+    expect(playersCount).to.equal(1);
+  });
+
   it("reveal: error on onlyOwner modifier", async () => {
     const market = await createMarketContract();
 
@@ -303,5 +306,163 @@ describe("Market", function () {
     await expect(
       market.reveal(playerId.address, result, outputImgUri)
     ).to.be.revertedWith("ERR_PLAYER_IS_NOT_REGISTERED");
+  });
+
+  it("reveal: should emit RevealPlayerResult event", async () => {
+    const blockTimestamp = await getBlockTimestamp();
+    const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
+
+    const market = await createMarketContract({ market: { startsAt } });
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+
+    const result = "Sample Result";
+    const outputImgUri = "outputImgUri";
+
+    await expect(market.reveal(playerId.address, result, outputImgUri))
+      .to.emit(market, "RevealPlayerResult")
+      .withArgs(playerId.address, result, outputImgUri);
+
+    const [id, playerPrompt, playerOutputImgUri, playerResult, playerBalance] =
+      await market.get_player(playerId.address);
+
+    const [amountMintable] = await market.get_amount_mintable(amount);
+
+    expect(id).to.equal(playerId.address);
+    expect(playerPrompt).to.equal(prompt);
+    expect(playerOutputImgUri).to.equal(outputImgUri);
+    expect(playerResult).to.equal(result);
+    expect(playerBalance.toString()).to.equal(amountMintable.toString());
+  });
+
+  it("resolve: error on onlyOwner modifier", async () => {
+    const market = await createMarketContract();
+
+    const nonOwner = ethers.Wallet.createRandom();
+
+    const playerId = ethers.Wallet.createRandom();
+
+    try {
+      await market.connect(nonOwner);
+      market.resolve(playerId.address);
+    } catch (error) {
+      expect((error as Error).message).to.match(/code=UNSUPPORTED_OPERATION?/);
+    }
+  });
+
+  it("resolve: error on assertEnoughParticipants modifier", async () => {
+    const market = await createMarketContract();
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await expect(market.resolve(playerId.address)).to.be.revertedWith(
+      "ERR_RESOLVE_0_PARTICIPANTS"
+    );
+  });
+
+  it("resolve: error on assertIsResolutionWindowOpen modifier", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+
+    const [resolutionWindow] = await market.get_resolution_data();
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(resolutionWindow.toNumber()).add(1, "minute").unix(),
+    ]);
+
+    await expect(market.resolve(playerId.address)).to.be.revertedWith(
+      "ERR_RESOLUTION_WINDOW_EXPIRED"
+    );
+  });
+
+  it("resolve: error on assertIsNotResolved modifier", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+    await market.resolve(playerId.address);
+
+    const [, revealWindow] = await market.get_resolution_data();
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(revealWindow.toNumber()).add(1, "minute").unix(),
+    ]);
+
+    await expect(market.resolve(playerId.address)).to.be.revertedWith(
+      "ERR_EVENT_IS_RESOLVED"
+    );
+  });
+
+  it("resolve: error on assertIsPlayerRegistered modifier", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+
+    const unregisteredPlayer = ethers.Wallet.createRandom();
+
+    const [, revealWindow] = await market.get_resolution_data();
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(revealWindow.toNumber()).add(1, "minute").unix(),
+    ]);
+
+    await expect(market.resolve(unregisteredPlayer.address)).to.be.revertedWith(
+      "ERR_PLAYER_IS_NOT_REGISTERED"
+    );
+  });
+
+  it("resolve: emit ResolutionSuccess event", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+
+    const [resolutionWindow, revealWindow] = await market.get_resolution_data();
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(revealWindow.toNumber()).subtract(1, "minute").unix(),
+    ]);
+
+    const result = "Sample Result";
+    const outputImgUri = "outputImgUri";
+
+    await market.reveal(playerId.address, result, outputImgUri);
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(resolutionWindow.toNumber()).subtract(1, "minute").unix(),
+    ]);
+
+    await expect(market.resolve(playerId.address))
+      .to.emit(market, "ResolutionSuccess")
+      .withArgs(playerId.address, result, outputImgUri);
   });
 });
