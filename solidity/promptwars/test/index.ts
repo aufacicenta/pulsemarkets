@@ -1,6 +1,7 @@
 /* eslint-disable node/no-unsupported-features/es-builtins */
 /* eslint-disable no-unused-expressions */
 import { expect } from "chai";
+import moment from "moment";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 
@@ -8,10 +9,22 @@ const DAO_ACCOUNT_ID = "dao_account.eth";
 const MARKET_CREATOR_ACCOUNT_ID = "creator.eth";
 const COLLATERAL_TOKEN_ACCOUNT_ID = "usdt.eth";
 
-async function createMarketContract() {
+async function getBlockTimestamp() {
+  const blockNumBefore = await ethers.provider.getBlockNumber();
+  const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+  const blockTimestamp = blockBefore.timestamp;
+
+  return blockTimestamp;
+}
+
+async function createMarketContract(overrides?: Record<string, any>) {
   const Market = await ethers.getContractFactory("Market");
 
-  const _market = { imageUri: "", startsAt: 0, endsAt: 0 };
+  const blockTimestamp = await getBlockTimestamp();
+
+  const startsAt = overrides?.market?.startsAt || blockTimestamp;
+
+  const _market = { imageUri: "", startsAt, endsAt: 0 };
 
   const _management = {
     daoAccountId: DAO_ACCOUNT_ID,
@@ -99,7 +112,7 @@ describe("Market", function () {
     expect(feeBalance.toString()).to.equal("0");
   });
 
-  it("create_outcome_token: should create token and emit event", async () => {
+  it("register_player: should create token and emit event", async () => {
     const market = await createMarketContract();
 
     const prompt = "Sample Prompt";
@@ -112,10 +125,10 @@ describe("Market", function () {
 
     // console.log({ amountMintable, fee });
 
-    const playerId = await ethers.getSigner(network.config.from!);
+    const playerId = ethers.Wallet.createRandom();
 
     await expect(market.register_player(amount, playerId.address, prompt))
-      .to.emit(market, "CreateOutcomeToken")
+      .to.emit(market, "RegisterPlayer")
       .withArgs(
         amount,
         playerId.address,
@@ -138,5 +151,79 @@ describe("Market", function () {
 
     const playersCount = await market.get_players_count();
     expect(playersCount).to.equal(1);
+  });
+
+  it("register_player: error on duplicate player address", async () => {
+    const market = await createMarketContract();
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await market.register_player(amount, playerId.address, prompt);
+
+    await expect(
+      market.register_player(amount, playerId.address, prompt)
+    ).to.be.revertedWith("ERR_REGISTER_PLAYER_PLAYER_EXISTS");
+  });
+
+  it("register_player: error on onlyOwner modifier", async () => {
+    const market = await createMarketContract();
+
+    const owner = await ethers.getSigner(network.config.from!);
+    const nonOwner = ethers.Wallet.createRandom();
+
+    expect(await market.owner()).to.equal(owner.address);
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    try {
+      await market
+        .connect(nonOwner)
+        .register_player(amount, nonOwner.address, prompt);
+    } catch (error) {
+      expect((error as Error).message).to.match(/code=UNSUPPORTED_OPERATION?/);
+    }
+  });
+
+  it("register_player: error on assertBeforeEnd modifier", async () => {
+    const blockTimestamp = await getBlockTimestamp();
+    const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
+
+    const market = await createMarketContract({ market: { startsAt } });
+
+    // eslint-disable-next-line no-unused-vars
+    const currentBlockTimestamp = await market.get_block_timestamp();
+
+    // eslint-disable-next-line no-unused-vars
+    const [, marketStartsAt, marketEndsAt] = await market.get_market_data();
+
+    // console.log({
+    //   blockTimestamp: moment.unix(blockTimestamp).format(),
+    //   startsAt: moment.unix(startsAt).format(),
+    //   currentBlockTimestamp: moment
+    //     .unix(currentBlockTimestamp.toNumber())
+    //     .format(),
+    //   marketStartsAt: moment.unix(marketStartsAt.toNumber()).format(),
+    //   marketEndsAt: moment.unix(marketEndsAt.toNumber()).format(),
+    // });
+
+    const prompt = "Sample Prompt";
+
+    const amount = BigNumber.from(120_000);
+
+    const playerId = ethers.Wallet.createRandom();
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(marketEndsAt.toNumber()).add(1, "minute").unix(),
+    ]);
+
+    await expect(
+      market.register_player(amount, playerId.address, prompt)
+    ).to.be.revertedWith("ERR_EVENT_ENDED");
   });
 });

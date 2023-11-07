@@ -95,13 +95,18 @@ contract Market is Ownable {
     // |                        MODIFIERS                             |
     // ================================================================
 
+    modifier assertBeforeEnd() {
+        require(block.timestamp <= _market.endsAt, "ERR_EVENT_ENDED");
+        _;
+    }
+
     modifier assertIsOpen() {
-        require(block.timestamp >= _market.startsAt, "ERR_MARKET_NOT_OPEN");
+        require(block.timestamp >= _market.startsAt, "ERR_EVENT_IS_NOT_OPEN");
         _;
     }
 
     modifier assertIsNotResolved() {
-        require(!_is_resolved(), "ERR_MARKET_RESOLVED");
+        require(!_is_resolved(), "ERR_EVENT_IS_RESOLVED");
         _;
     }
 
@@ -124,7 +129,7 @@ contract Market is Ownable {
     // |                          Events                              |
     // ================================================================
 
-    event CreateOutcomeToken(
+    event RegisterPlayer(
         uint amount,
         address outcomeId,
         uint supply,
@@ -149,21 +154,19 @@ contract Market is Ownable {
         Management memory management,
         CollateralToken memory collateralToken
     ) Ownable(msg.sender) {
-        uint endsAt;
-        uint revealWindow;
         uint resolutionWindow;
         uint selfDestructWindow;
 
-        uint startsAt = block.timestamp;
-        (, endsAt) = startsAt.tryAdd(EVENT_PERIOD_NANOS);
-        (, revealWindow) = endsAt.tryAdd(STAGE_PERIOD_NANOS);
+        uint startsAt = market.startsAt;
+        uint endsAt = startsAt + EVENT_PERIOD_NANOS;
+        uint revealWindow = endsAt + STAGE_PERIOD_NANOS;
         (, resolutionWindow) = revealWindow.tryAdd(STAGE_PERIOD_NANOS);
 
         (, selfDestructWindow) = resolutionWindow.tryAdd(7 days);
 
         market.startsAt = startsAt;
         market.endsAt = endsAt;
-        market = market;
+        _market = market;
 
         management.selfDestructWindow = selfDestructWindow;
         management.buySellThreshold = BUY_SELL_THRESHOLD;
@@ -181,7 +184,7 @@ contract Market is Ownable {
     }
 
     /**
-     * @notice This function is used to create a new outcome token. An outcome token represents a player's entry into the competition.
+     * @notice This function is used to create a new Player record. A Player may enter the game before the event starts
      * @param amount The amount of collateral to use for creating the outcome token. This amount must be equal to or greater than the fee required for creating an outcome token.
      * @param playerId The address of the account creating the outcome token. This address is also used as the account id of the created outcome token.
      * @param prompt A string value representing the prompt submitted to the competition. This becomes the outcome value of the created outcome token.
@@ -190,12 +193,12 @@ contract Market is Ownable {
         uint amount,
         address playerId,
         string memory prompt
-    ) public onlyOwner assertIsOpen assertIsNotResolved assertPrice(amount) {
+    ) public onlyOwner assertBeforeEnd assertIsNotResolved assertPrice(amount) {
         Player storage player = players[playerId];
 
         require(
             address(player.id) == address(0),
-            "ERR_CREATE_OUTCOME_TOKEN_outcome_id_EXIST"
+            "ERR_REGISTER_PLAYER_PLAYER_EXISTS"
         );
 
         uint amountMintable;
@@ -213,7 +216,7 @@ contract Market is Ownable {
         _collateralToken.balance += amount;
         _collateralToken.feeBalance += fee;
 
-        emit CreateOutcomeToken(
+        emit RegisterPlayer(
             amount,
             playerId,
             player.supply,
@@ -294,6 +297,13 @@ contract Market is Ownable {
      */
     function get_players_count() public view returns (uint256) {
         return _playerIds.length;
+    }
+
+    /**
+     * @return The current block timestamp
+     */
+    function get_block_timestamp() public view returns (uint256) {
+        return block.timestamp;
     }
 
     // ================================================================
