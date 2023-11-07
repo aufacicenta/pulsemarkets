@@ -22,9 +22,9 @@ contract Market is Ownable {
         uint endsAt;
     }
 
-    struct OutcomeToken {
+    struct Player {
         // the account id of the outcomeToken
-        address outcomeId;
+        address id;
         // the outcome value, in this case, the prompt submitted to the competition
         string prompt;
         // the outcome value, in this case, the prompt submitted to the competition
@@ -82,8 +82,8 @@ contract Market is Ownable {
     // |                            STATE                             |
     // ================================================================
 
-    mapping(address => OutcomeToken) outcomeTokens;
-    address[] private _players;
+    mapping(address => Player) players;
+    address[] private _playerIds;
 
     MarketData private _market;
     Resolution private _resolution;
@@ -186,15 +186,15 @@ contract Market is Ownable {
      * @param playerId The address of the account creating the outcome token. This address is also used as the account id of the created outcome token.
      * @param prompt A string value representing the prompt submitted to the competition. This becomes the outcome value of the created outcome token.
      */
-    function create_outcome_token(
+    function register_player(
         uint amount,
         address playerId,
         string memory prompt
     ) public onlyOwner assertIsOpen assertIsNotResolved assertPrice(amount) {
-        OutcomeToken storage outcomeToken = outcomeTokens[playerId];
+        Player storage player = players[playerId];
 
         require(
-            address(outcomeToken.outcomeId) == address(0),
+            address(player.id) == address(0),
             "ERR_CREATE_OUTCOME_TOKEN_outcome_id_EXIST"
         );
 
@@ -202,13 +202,13 @@ contract Market is Ownable {
         uint fee;
         (amountMintable, fee) = get_amount_mintable(amount);
 
-        outcomeToken.outcomeId = playerId;
-        outcomeToken.prompt = prompt;
-        outcomeToken.supply = amountMintable;
+        player.id = playerId;
+        player.prompt = prompt;
+        player.supply = amountMintable;
 
-        _players.push(playerId);
+        _playerIds.push(playerId);
 
-        outcomeTokens[playerId] = outcomeToken;
+        players[playerId] = player;
 
         _collateralToken.balance += amount;
         _collateralToken.feeBalance += fee;
@@ -216,7 +216,7 @@ contract Market is Ownable {
         emit CreateOutcomeToken(
             amount,
             playerId,
-            outcomeToken.supply,
+            player.supply,
             fee,
             _collateralToken.balance,
             _collateralToken.feeBalance
@@ -270,14 +270,12 @@ contract Market is Ownable {
      * @param playerId The player's address.
      * @return The outcome token data of a specified player.
      */
-    function get_outcome_token(
-        address playerId
-    ) public view returns (OutcomeToken memory) {
+    function get_player(address playerId) public view returns (Player memory) {
         require(
-            address(outcomeTokens[playerId].outcomeId) != address(0),
+            address(players[playerId].id) != address(0),
             "ERR_INVALID_OUTCOME_ID"
         );
-        return outcomeTokens[playerId];
+        return players[playerId];
     }
 
     /**
@@ -295,7 +293,7 @@ contract Market is Ownable {
      * @return The total number of players.
      */
     function get_players_count() public view returns (uint256) {
-        return _players.length;
+        return _playerIds.length;
     }
 
     // ================================================================

@@ -7,7 +7,6 @@ import { ethers, network } from "hardhat";
 const DAO_ACCOUNT_ID = "dao_account.eth";
 const MARKET_CREATOR_ACCOUNT_ID = "creator.eth";
 const COLLATERAL_TOKEN_ACCOUNT_ID = "usdt.eth";
-const SENDER_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 
 async function createMarketContract() {
   const Market = await ethers.getContractFactory("Market");
@@ -115,7 +114,7 @@ describe("Market", function () {
 
     const playerId = await ethers.getSigner(network.config.from!);
 
-    await expect(market.create_outcome_token(amount, playerId.address, prompt))
+    await expect(market.register_player(amount, playerId.address, prompt))
       .to.emit(market, "CreateOutcomeToken")
       .withArgs(
         amount,
@@ -126,11 +125,11 @@ describe("Market", function () {
         collateralTokenFeeBalance
       );
 
-    const outcomeToken = await market.get_outcome_token(playerId.address);
+    const player = await market.get_player(playerId.address);
 
-    expect(outcomeToken.outcomeId).to.equal(playerId.address);
-    expect(outcomeToken.prompt).to.equal(prompt);
-    expect(outcomeToken.supply).to.equal(amountMintable);
+    expect(player.id).to.equal(playerId.address);
+    expect(player.prompt).to.equal(prompt);
+    expect(player.supply).to.equal(amountMintable);
 
     const collateralTokenData = await market.get_collateral_token_data();
 
