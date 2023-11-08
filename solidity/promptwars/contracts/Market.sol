@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Market is Ownable {
     using Math for uint;
@@ -36,7 +37,7 @@ contract Market is Ownable {
     }
 
     struct CollateralToken {
-        string id;
+        address id;
         uint balance;
         uint decimals;
         uint feeBalance;
@@ -111,12 +112,15 @@ contract Market is Ownable {
     }
 
     modifier assertIsRevealWindowOpen() {
-        require(!_is_reveal_window_open(), "ERR_REVEAL_WINDOW_EXPIRED");
+        require(!_is_reveal_window_expired(), "ERR_REVEAL_WINDOW_EXPIRED");
         _;
     }
 
     modifier assertIsResolutionWindowOpen() {
-        require(!_is_resolution_window_open(), "ERR_RESOLUTION_WINDOW_EXPIRED");
+        require(
+            !_is_resolution_window_expired(),
+            "ERR_RESOLUTION_WINDOW_EXPIRED"
+        );
         _;
     }
 
@@ -171,6 +175,8 @@ contract Market is Ownable {
         string outputImgUri
     );
 
+    event InternalSellUnresolved(address payee, uint amount);
+
     // ================================================================
     // |                          PUBLIC                              |
     // ================================================================
@@ -213,22 +219,21 @@ contract Market is Ownable {
     }
 
     /**
-     * @notice This function is used to create a new Player record. A Player may enter the game before the event starts
-     * @param amount The amount of collateral to use for creating the outcome token. This amount must be equal to or greater than the fee required for creating an outcome token.
+     * @notice This function is used to create a new Player record. A Player may enter the game before the event starts.
+     * @notice A player must have approved an ERC20 of at least the game price to get registered.
      * @param playerId The address of the account creating the outcome token. This address is also used as the account id of the created outcome token.
      * @param prompt A string value representing the prompt submitted to the competition. This becomes the outcome value of the created outcome token.
      */
     function register_player(
-        uint amount,
         address playerId,
         string memory prompt
-    )
-        public
-        onlyOwner
-        assertPlayerIsNotRegistered(playerId)
-        assertBeforeEnd
-        assertPrice(amount)
-    {
+    ) public onlyOwner assertPlayerIsNotRegistered(playerId) assertBeforeEnd {
+        uint amount = _internal_transfer_from(
+            playerId,
+            address(this),
+            _fees.price
+        );
+
         Player storage player = players[playerId];
 
         uint amountMintable;
@@ -302,6 +307,15 @@ contract Market is Ownable {
         emit ResolutionSuccess(playerId, result, outputImgUri);
     }
 
+    // @TODO test for this method for both cases
+    function sell() public returns (uint) {
+        if (_is_expired_unresolved()) {
+            return _internal_sell_unresolved();
+        }
+
+        return _internal_sell_resolved();
+    }
+
     // ================================================================
     // |                        Public VIEWS                          |
     // ================================================================
@@ -349,11 +363,9 @@ contract Market is Ownable {
      * @param playerId The player's address.
      * @return The outcome token data of a specified player.
      */
-    function get_player(address playerId) public view returns (Player memory) {
-        require(
-            address(players[playerId].id) != address(0),
-            "ERR_INVALID_OUTCOME_ID"
-        );
+    function get_player(
+        address playerId
+    ) public view assertIsPlayerRegistered(playerId) returns (Player memory) {
         return players[playerId];
     }
 
@@ -383,7 +395,7 @@ contract Market is Ownable {
     }
 
     // ================================================================
-    // |                        PRIVATE                               |
+    // |                        PRIVATE FLAGS                         |
     // ================================================================
 
     /**
@@ -399,17 +411,98 @@ contract Market is Ownable {
         return block.timestamp <= _market.endsAt;
     }
 
-    function _is_reveal_window_open() private view returns (bool) {
+    function _is_reveal_window_expired() private view returns (bool) {
         return block.timestamp > _resolution.revealWindow;
     }
 
-    function _is_resolution_window_open() private view returns (bool) {
+    function _is_resolution_window_expired() private view returns (bool) {
         return block.timestamp > _resolution.window;
+    }
+
+    function _is_expired_unresolved() private view returns (bool) {
+        return
+            !_is_before_market_ends() &&
+            _is_resolution_window_expired() &&
+            !_is_resolved();
     }
 
     function _player_exists(address playerId) private view returns (bool) {
         return address(players[playerId].id) != address(0);
     }
+
+    // ================================================================
+    // |                        INTERNAL                              |
+    // ================================================================
+
+    function _internal_sell_unresolved() private returns (uint) {
+        address senderId = msg.sender;
+
+        Player memory payee = get_player(senderId);
+
+        uint playerBalance = payee.balance;
+
+        uint amountMintable;
+        (amountMintable, ) = get_amount_mintable(_fees.price);
+
+        // @TODO test for this error and method
+        require(
+            playerBalance == amountMintable,
+            "ERR_SELL_INSUFFICIENT_BALANCE"
+        );
+
+        _internal_transfer(senderId, playerBalance);
+
+        payee.balance = 0;
+
+        emit InternalSellUnresolved(senderId, playerBalance);
+
+        return playerBalance;
+    }
+
+    // @TODO implement logic
+    function _internal_sell_resolved() private view returns (uint) {
+        Player memory payee = get_player(msg.sender);
+
+        uint playerBalance = payee.balance;
+
+        return playerBalance;
+    }
+
+    function _internal_transfer(
+        address _to,
+        uint _amount
+    ) private returns (uint) {
+        address _tokenAddr = _collateralToken.id;
+
+        ERC20 token = ERC20(_tokenAddr);
+
+        // @TODO test error and method
+        require(token.transfer(_to, _amount), "ERR_INTERNAL_TRANSFER_FAILED");
+
+        return _amount;
+    }
+
+    function _internal_transfer_from(
+        address _from,
+        address _to,
+        uint _amount
+    ) private returns (uint) {
+        address _tokenAddr = _collateralToken.id;
+
+        ERC20 token = ERC20(_tokenAddr);
+
+        // @TODO test error and method
+        require(
+            token.transferFrom(_from, _to, _amount),
+            "ERR_INTERNAL_TRANSFER_FROM_FAILED"
+        );
+
+        return _amount;
+    }
+
+    // ================================================================
+    // |                        PRIVATE UTILS                         |
+    // ================================================================
 
     /**
      * @notice Calculate percentage of amount.
