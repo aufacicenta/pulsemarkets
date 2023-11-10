@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Market is Ownable {
-    using Math for uint;
-    using SafeCast for uint;
-
     // ================================================================
     // |                        STRUCTS                                 |
     // ================================================================
@@ -37,9 +32,13 @@ contract Market is Ownable {
     }
 
     struct CollateralToken {
+        // The ERC20 token address
         address id;
+        // The ERC20 token balance
         uint balance;
+        // The ERC20 token decimals
         uint decimals;
+        // The ERC20 token fee balance
         uint feeBalance;
     }
 
@@ -288,6 +287,11 @@ contract Market is Ownable {
         emit RevealPlayerResult(playerId, result, outputImgUri);
     }
 
+    /**
+     * @notice This function is used to resolve the market.
+     * @dev Only the owner can resolve the market.
+     * @param playerId The ID of the player to resolve the market for.
+     */
     function resolve(
         address playerId
     )
@@ -309,7 +313,11 @@ contract Market is Ownable {
         emit ResolutionSuccess(playerId, result, outputImgUri);
     }
 
-    // @TODO test for this method for both cases
+    /**
+     * @notice This function is used to claim a player's balance.
+     * @dev A player executes this transaction. A player sells its current balance.
+     * @return The amount sold.
+     */
     function sell() public returns (uint) {
         if (_is_expired_unresolved()) {
             return _internal_sell_unresolved();
@@ -409,18 +417,34 @@ contract Market is Ownable {
         return _resolution.resolvedAt != 0;
     }
 
+    /**
+     * @dev Check if the current block timestamp is before the market ends.
+     * @return bool Whether the current block timestamp is before the market ends or not.
+     */
     function _is_before_market_ends() private view returns (bool) {
         return block.timestamp <= _market.endsAt;
     }
 
+    /**
+     * @dev Check if the reveal window is expired.
+     * @return bool Whether the reveal window is expired or not.
+     */
     function _is_reveal_window_expired() private view returns (bool) {
         return block.timestamp > _resolution.revealWindow;
     }
 
+    /**
+     * @dev Check if the resolution window is expired.
+     * @return bool Whether the resolution window is expired or not.
+     */
     function _is_resolution_window_expired() private view returns (bool) {
         return block.timestamp > _resolution.window;
     }
 
+    /**
+     * @dev Check if the market is expired and unresolved.
+     * @return bool Whether the market is expired and unresolved or not.
+     */
     function _is_expired_unresolved() private view returns (bool) {
         return
             !_is_before_market_ends() &&
@@ -428,6 +452,11 @@ contract Market is Ownable {
             !_is_resolved();
     }
 
+    /**
+     * @dev Checks if a player exists.
+     * @param playerId The address of the player to check.
+     * @return A boolean indicating whether the player exists.
+     */
     function _player_exists(address playerId) private view returns (bool) {
         return address(players[playerId].id) != address(0);
     }
@@ -436,6 +465,10 @@ contract Market is Ownable {
     // |                        INTERNAL                              |
     // ================================================================
 
+    /**
+     * @dev Handles the internal selling process for unresolved game matches.
+     * @return The balance of the player after the selling process.
+     */
     function _internal_sell_unresolved() private returns (uint) {
         address senderId = msg.sender;
 
@@ -461,15 +494,32 @@ contract Market is Ownable {
         return playerBalance;
     }
 
-    // @TODO implement logic
-    function _internal_sell_resolved() private view returns (uint) {
-        Player memory payee = get_player(msg.sender);
+    /**
+     * @dev Private: handles the internal selling process for resolved transactions.
+     * @return The balance of the player after the selling process.
+     */
+    function _internal_sell_resolved() private returns (uint) {
+        address playerId = msg.sender;
 
-        uint playerBalance = payee.balance;
+        require(
+            _resolution.playerId == playerId,
+            "ERR_SELL_RESOLVED_SENDER_IS_NOT_WINNER"
+        );
 
-        return playerBalance;
+        uint amountPayable = _collateralToken.balance -
+            _collateralToken.feeBalance;
+
+        require(amountPayable > 0, "ERR_SELL_RESOLVED_INSUFFICIENT_FUNDS");
+
+        return _internal_transfer(playerId, amountPayable);
     }
 
+    /**
+     * @dev Private: handles the internal transfer process.
+     * @param _to The address to transfer the amount to.
+     * @param _amount The amount to transfer.
+     * @return The amount transferred.
+     */
     function _internal_transfer(
         address _to,
         uint _amount
@@ -484,6 +534,13 @@ contract Market is Ownable {
         return _amount;
     }
 
+    /**
+     * @dev Private: handles the internal transfer from process.
+     * @param _from The address to transfer the amount from.
+     * @param _to The address to transfer the amount to.
+     * @param _amount The amount to transfer.
+     * @return The amount transferred.
+     */
     function _internal_transfer_from(
         address _from,
         address _to,
