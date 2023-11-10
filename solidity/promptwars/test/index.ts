@@ -165,7 +165,7 @@ describe("Market", function () {
     expect(feeBalance.toString()).to.equal("0");
   });
 
-  it("register_player: error on duplicate player address", async () => {
+  it("register: error on duplicate player address", async () => {
     const { market, collateralToken } = await createMarketContracts();
 
     const amount = await getEntryAmount(market);
@@ -181,42 +181,14 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
-    await expect(
-      market.register_player(player.address, prompt)
-    ).to.be.revertedWith("ERR_PLAYER_EXISTS");
-  });
-
-  it("register_player: error on onlyOwner modifier", async () => {
-    const owner = await ethers.getSigner(network.config.from!);
-    const nonOwner = ethers.Wallet.createRandom();
-
-    const { market, collateralToken } = await createMarketContracts();
-
-    expect(await market.owner()).to.equal(owner.address);
-
-    const amount = await getEntryAmount(market);
-
-    const [, player] = await ethers.getSigners();
-
-    await approveCollateralTokenSpending(
-      collateralToken,
-      player,
-      market.address,
-      amount.toNumber()
+    await expect(market.connect(player).register(prompt)).to.be.revertedWith(
+      "ERR_PLAYER_EXISTS"
     );
-
-    const prompt = "Sample Prompt";
-
-    try {
-      await market.connect(nonOwner).register_player(nonOwner.address, prompt);
-    } catch (error) {
-      expect((error as Error).message).to.match(/code=UNSUPPORTED_OPERATION?/);
-    }
   });
 
-  it("register_player: error on assertBeforeEnd modifier", async () => {
+  it("register: error on assertBeforeEnd modifier", async () => {
     const blockTimestamp = await getBlockTimestamp();
     const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
 
@@ -257,12 +229,12 @@ describe("Market", function () {
       moment.unix(marketEndsAt.toNumber()).add(1, "minute").unix(),
     ]);
 
-    await expect(
-      market.register_player(player.address, prompt)
-    ).to.be.revertedWith("ERR_EVENT_ENDED");
+    await expect(market.connect(player).register(prompt)).to.be.revertedWith(
+      "ERR_EVENT_ENDED"
+    );
   });
 
-  it("register_player: error on ERC20InsufficientAllowance", async () => {
+  it("register: error on ERC20InsufficientAllowance", async () => {
     const { market, collateralToken } = await createMarketContracts();
 
     const amount = await getEntryAmount(market);
@@ -279,13 +251,13 @@ describe("Market", function () {
     const prompt = "Sample Prompt";
 
     try {
-      await market.register_player(player.address, prompt);
+      await market.connect(player).register(prompt);
     } catch (error) {
       expect((error as Error).message).to.match(/ERC20InsufficientAllowance?/);
     }
   });
 
-  it("register_player: should create token and emit RegisterPlayer event", async () => {
+  it("register: should create token and emit RegisterPlayer event", async () => {
     const { market, collateralToken } = await createMarketContracts();
 
     const amount = await getEntryAmount(market);
@@ -308,7 +280,7 @@ describe("Market", function () {
 
     // console.log({ amountMintable, fee });
 
-    await expect(market.register_player(player.address, prompt))
+    await expect(market.connect(player).register(prompt))
       .to.emit(market, "RegisterPlayer")
       .withArgs(
         amount,
@@ -373,7 +345,7 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     const [, revealWindow] = await market.get_resolution_data();
 
@@ -426,7 +398,7 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     const result = "Sample Result";
     const outputImgUri = "outputImgUri";
@@ -488,7 +460,7 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     const [resolutionWindow] = await market.get_resolution_data();
 
@@ -517,7 +489,7 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     await market.resolve(player.address);
 
@@ -548,7 +520,7 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     const unregisteredPlayer = ethers.Wallet.createRandom();
 
@@ -579,7 +551,7 @@ describe("Market", function () {
 
     const prompt = "Sample Prompt";
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     const [resolutionWindow, revealWindow] = await market.get_resolution_data();
 
@@ -652,7 +624,7 @@ describe("Market", function () {
 
     expect(marketSpendingAllowance).to.equal(price);
 
-    await market.register_player(player.address, prompt);
+    await market.connect(player).register(prompt);
 
     const collateralTokenPlayerBalance = await collateralToken.balanceOf(
       player.address

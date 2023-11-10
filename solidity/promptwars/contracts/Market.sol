@@ -220,14 +220,16 @@ contract Market is Ownable {
 
     /**
      * @notice This function is used to create a new Player record. A Player may enter the game before the event starts.
-     * @notice A player must have approved an ERC20 of at least the game price to get registered.
-     * @param playerId The address of the account creating the outcome token. This address is also used as the account id of the created outcome token.
+     * @notice A player must have approved an ERC20 of minimum the game price amount to get registered.
+     * @notice A player executes this transaction. A player registers itself.
      * @param prompt A string value representing the prompt submitted to the competition. This becomes the outcome value of the created outcome token.
+     * @dev we may change "prompt" for "value" in the future, so that we store any data for any game (or modify it depending on the game)
      */
-    function register_player(
-        address playerId,
+    function register(
         string memory prompt
-    ) public onlyOwner assertPlayerIsNotRegistered(playerId) assertBeforeEnd {
+    ) public assertPlayerIsNotRegistered(msg.sender) assertBeforeEnd {
+        address playerId = msg.sender;
+
         uint amount = _internal_transfer_from(
             playerId,
             address(this),
