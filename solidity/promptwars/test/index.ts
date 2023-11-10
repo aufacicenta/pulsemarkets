@@ -644,4 +644,68 @@ describe("Market", function () {
       .to.emit(market, "InternalSellUnresolved")
       .withArgs(player.address, amountMintable);
   });
+
+  it("sell: _is_expired_resolved _internal_sell_resolved", async () => {
+    const [owner, player, collateralTokenOwner, player2] =
+      await ethers.getSigners();
+
+    const { market, collateralToken } = await createMarketContracts();
+
+    const [price] = await market.get_fees_data();
+
+    await collateralToken
+      .connect(collateralTokenOwner)
+      .transfer(player.address, price);
+
+    await collateralToken
+      .connect(collateralTokenOwner)
+      .transfer(player2.address, price);
+
+    const prompt = "Sample Prompt";
+
+    await collateralToken.connect(player).approve(market.address, price);
+    await collateralToken.connect(player2).approve(market.address, price);
+
+    await market.connect(player).register(prompt);
+    await market.connect(player2).register(prompt);
+
+    const collateralTokenPlayerBalance = await collateralToken.balanceOf(
+      player.address
+    );
+
+    const collateralTokenPlayer2Balance = await collateralToken.balanceOf(
+      player.address
+    );
+
+    expect(collateralTokenPlayerBalance).to.equal(0);
+    expect(collateralTokenPlayer2Balance).to.equal(0);
+
+    const [, revealWindow] = await market.get_resolution_data();
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(revealWindow.toNumber()).subtract(1, "minute").unix(),
+    ]);
+
+    // This player wins
+    market.connect(owner).reveal(player.address, "0.078", "outputImgIPFSUri");
+    market.connect(owner).resolve(player.address);
+
+    await expect(market.connect(player2).sell()).to.be.revertedWith(
+      "ERR_SELL_RESOLVED_SENDER_IS_NOT_WINNER"
+    );
+
+    const collateralTokenData = await market.get_collateral_token_data();
+
+    const amountPayable =
+      collateralTokenData.balance.toNumber() -
+      collateralTokenData.feeBalance.toNumber();
+
+    await expect(market.connect(player).sell())
+      .to.emit(market, "InternalSellResolved")
+      .withArgs(player.address, amountPayable);
+
+    await expect(market.connect(player).sell()).to.be.revertedWith(
+      "ERR_SELL_RESOLVED_INSUFFICIENT_FUNDS"
+    );
+  });
 });

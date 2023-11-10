@@ -175,6 +175,7 @@ contract Market is Ownable {
     );
 
     event InternalSellUnresolved(address payee, uint amount);
+    event InternalSellResolved(address payee, uint amount);
 
     // ================================================================
     // |                          PUBLIC                              |
@@ -265,7 +266,7 @@ contract Market is Ownable {
     /**
      * @notice This function is used to reveal a player's result.
      * @param playerId The ID of the player to reveal the result for.
-     * @param result The player's result.
+     * @param result The player's result. This value may vary from game to game. in this case, is the percentage of the image prompt result comparison.
      * @param outputImgUri The output image URI of the player.
      */
     function reveal(
@@ -502,6 +503,11 @@ contract Market is Ownable {
         address playerId = msg.sender;
 
         require(
+            _collateralToken.balance > 0,
+            "ERR_SELL_RESOLVED_INSUFFICIENT_FUNDS"
+        );
+
+        require(
             _resolution.playerId == playerId,
             "ERR_SELL_RESOLVED_SENDER_IS_NOT_WINNER"
         );
@@ -509,9 +515,13 @@ contract Market is Ownable {
         uint amountPayable = _collateralToken.balance -
             _collateralToken.feeBalance;
 
-        require(amountPayable > 0, "ERR_SELL_RESOLVED_INSUFFICIENT_FUNDS");
+        _internal_transfer(playerId, amountPayable);
 
-        return _internal_transfer(playerId, amountPayable);
+        _collateralToken.balance = 0;
+
+        emit InternalSellResolved(playerId, amountPayable);
+
+        return amountPayable;
     }
 
     /**
