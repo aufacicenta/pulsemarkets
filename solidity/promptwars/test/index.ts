@@ -97,147 +97,170 @@ async function createMarketContract(overrides?: Record<string, any>) {
 }
 
 describe("Market", function () {
-  // it("Initialize: call constructor", async function () {
-  //   const market = await createMarketContract();
+  it("Initialize: call constructor", async function () {
+    const market = await createMarketContract();
 
-  //   const marketData = await market.get_market_data();
+    const marketData = await market.get_market_data();
 
-  //   // console.log(marketData);
+    // console.log(marketData);
 
-  //   expect(marketData).to.have.lengthOf(3);
+    expect(marketData).to.have.lengthOf(3);
 
-  //   const [imageUri, startsAt, endsAt] = marketData;
+    const [imageUri, startsAt, endsAt] = marketData;
 
-  //   expect(imageUri).to.equal("");
-  //   expect(startsAt.toString()).to.not.be.null;
-  //   expect(endsAt.toString()).to.not.be.null;
+    expect(imageUri).to.equal("");
+    expect(startsAt.toString()).to.not.be.null;
+    expect(endsAt.toString()).to.not.be.null;
 
-  //   const resolutionData = await market.get_resolution_data();
+    const resolutionData = await market.get_resolution_data();
 
-  //   // console.log(resolutionData);
+    // console.log(resolutionData);
 
-  //   expect(resolutionData).to.have.lengthOf(4);
+    expect(resolutionData).to.have.lengthOf(4);
 
-  //   const [resolutionWindow, revealWindow, resolvedAt, player] = resolutionData;
+    const [resolutionWindow, revealWindow, resolvedAt, player] = resolutionData;
 
-  //   expect(resolutionWindow.toString()).to.not.be.null;
-  //   expect(revealWindow.toString()).to.not.be.null;
-  //   expect(resolvedAt.toString()).to.equal("0");
-  //   expect(player.toString()).to.equal(
-  //     "0x0000000000000000000000000000000000000000"
-  //   );
+    expect(resolutionWindow.toString()).to.not.be.null;
+    expect(revealWindow.toString()).to.not.be.null;
+    expect(resolvedAt.toString()).to.equal("0");
+    expect(player.toString()).to.equal(
+      "0x0000000000000000000000000000000000000000"
+    );
 
-  //   const feesData = await market.get_fees_data();
+    const feesData = await market.get_fees_data();
 
-  //   // console.log(feesData);
+    // console.log(feesData);
 
-  //   const [price, feeRatio, claimedAt] = feesData;
+    const [price, feeRatio, claimedAt] = feesData;
 
-  //   expect(price.toString()).to.equal("10000");
-  //   expect(feeRatio.toString()).to.equal("20");
-  //   expect(claimedAt.toString()).to.equal("0");
+    expect(price.toString()).to.equal("10000");
+    expect(feeRatio.toString()).to.equal("20");
+    expect(claimedAt.toString()).to.equal("0");
 
-  //   const managementData = await market.get_management_data();
+    const managementData = await market.get_management_data();
 
-  //   // console.log(managementData);
+    // console.log(managementData);
 
-  //   const [
-  //     daoAccountId,
-  //     marketCreatorAccountId,
-  //     selfDestructWindow,
-  //     buySellThreshold,
-  //   ] = managementData;
+    const [
+      daoAccountId,
+      marketCreatorAccountId,
+      selfDestructWindow,
+      buySellThreshold,
+    ] = managementData;
 
-  //   expect(daoAccountId).to.equal(DAO_ACCOUNT_ID);
-  //   expect(marketCreatorAccountId).to.equal(MARKET_CREATOR_ACCOUNT_ID);
-  //   expect(selfDestructWindow.toString()).to.not.be.null;
-  //   expect(buySellThreshold.toString()).to.equal("75");
+    expect(daoAccountId).to.equal(DAO_ACCOUNT_ID);
+    expect(marketCreatorAccountId).to.equal(MARKET_CREATOR_ACCOUNT_ID);
+    expect(selfDestructWindow.toString()).to.not.be.null;
+    expect(buySellThreshold.toString()).to.equal("75");
 
-  //   const collateralTokenData = await market.get_collateral_token_data();
+    const collateralTokenData = await market.get_collateral_token_data();
 
-  //   // console.log(collateralTokenData);
+    // console.log(collateralTokenData);
 
-  //   const [id, balance, decimals, feeBalance] = collateralTokenData;
+    const [id, balance, decimals, feeBalance] = collateralTokenData;
 
-  //   expect(id).to.equal(COLLATERAL_TOKEN_ACCOUNT_ID);
-  //   expect(balance.toString()).to.equal("0");
-  //   expect(decimals.toString()).to.equal("0");
-  //   expect(feeBalance.toString()).to.equal("0");
-  // });
+    expect(id).to.equal(COLLATERAL_TOKEN_ACCOUNT_ID);
+    expect(balance.toString()).to.equal("0");
+    expect(decimals.toString()).to.equal("0");
+    expect(feeBalance.toString()).to.equal("0");
+  });
 
-  // it("register_player: error on duplicate player address", async () => {
-  //   const market = await createMarketContract();
+  it("register_player: error on duplicate player address", async () => {
+    const { market, collateralToken } = await createMarketContracts();
 
-  //   const prompt = "Sample Prompt";
+    const amount = await getEntryAmount(market);
 
-  //   const amount = await getEntryAmount(market);
+    const [, player] = await ethers.getSigners();
 
-  //   const [, player] = await ethers.getSigners();
+    await approveCollateralTokenSpending(
+      collateralToken,
+      player,
+      market.address,
+      amount.toNumber() * 2
+    );
 
-  //   await market.register_player(amount, player.address, prompt);
+    const prompt = "Sample Prompt";
 
-  //   await expect(
-  //     market.register_player(amount, player.address, prompt)
-  //   ).to.be.revertedWith("ERR_PLAYER_EXISTS");
-  // });
+    await market.register_player(player.address, prompt);
 
-  // it("register_player: error on onlyOwner modifier", async () => {
-  //   const market = await createMarketContract();
+    await expect(
+      market.register_player(player.address, prompt)
+    ).to.be.revertedWith("ERR_PLAYER_EXISTS");
+  });
 
-  //   const owner = await ethers.getSigner(network.config.from!);
-  //   const nonOwner = ethers.Wallet.createRandom();
+  it("register_player: error on onlyOwner modifier", async () => {
+    const owner = await ethers.getSigner(network.config.from!);
+    const nonOwner = ethers.Wallet.createRandom();
 
-  //   expect(await market.owner()).to.equal(owner.address);
+    const { market, collateralToken } = await createMarketContracts();
 
-  //   const prompt = "Sample Prompt";
+    expect(await market.owner()).to.equal(owner.address);
 
-  //   const amount = await getEntryAmount(market);
+    const amount = await getEntryAmount(market);
 
-  //   try {
-  //     await market
-  //       .connect(nonOwner)
-  //       .register_player(amount, nonOwner.address, prompt);
-  //   } catch (error) {
-  //     expect((error as Error).message).to.match(/code=UNSUPPORTED_OPERATION?/);
-  //   }
-  // });
+    const [, player] = await ethers.getSigners();
 
-  // it("register_player: error on assertBeforeEnd modifier", async () => {
-  //   const blockTimestamp = await getBlockTimestamp();
-  //   const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
+    await approveCollateralTokenSpending(
+      collateralToken,
+      player,
+      market.address,
+      amount.toNumber()
+    );
 
-  //   const market = await createMarketContract({ market: { startsAt } });
+    const prompt = "Sample Prompt";
 
-  //   // eslint-disable-next-line no-unused-vars
-  //   const currentBlockTimestamp = await market.get_block_timestamp();
+    try {
+      await market.connect(nonOwner).register_player(nonOwner.address, prompt);
+    } catch (error) {
+      expect((error as Error).message).to.match(/code=UNSUPPORTED_OPERATION?/);
+    }
+  });
 
-  //   // eslint-disable-next-line no-unused-vars
-  //   const [, marketStartsAt, marketEndsAt] = await market.get_market_data();
+  it("register_player: error on assertBeforeEnd modifier", async () => {
+    const blockTimestamp = await getBlockTimestamp();
+    const startsAt = moment.unix(blockTimestamp).add(5, "minute").unix();
 
-  //   // console.log({
-  //   //   blockTimestamp: moment.unix(blockTimestamp).format(),
-  //   //   startsAt: moment.unix(startsAt).format(),
-  //   //   currentBlockTimestamp: moment
-  //   //     .unix(currentBlockTimestamp.toNumber())
-  //   //     .format(),
-  //   //   marketStartsAt: moment.unix(marketStartsAt.toNumber()).format(),
-  //   //   marketEndsAt: moment.unix(marketEndsAt.toNumber()).format(),
-  //   // });
+    const { market, collateralToken } = await createMarketContracts({
+      market: { startsAt },
+    });
 
-  //   const prompt = "Sample Prompt";
+    // eslint-disable-next-line no-unused-vars
+    const currentBlockTimestamp = await market.get_block_timestamp();
 
-  //   const amount = await getEntryAmount(market);
+    // eslint-disable-next-line no-unused-vars
+    const [, marketStartsAt, marketEndsAt] = await market.get_market_data();
 
-  //   const [, player] = await ethers.getSigners();
+    // console.log({
+    //   blockTimestamp: moment.unix(blockTimestamp).format(),
+    //   startsAt: moment.unix(startsAt).format(),
+    //   currentBlockTimestamp: moment
+    //     .unix(currentBlockTimestamp.toNumber())
+    //     .format(),
+    //   marketStartsAt: moment.unix(marketStartsAt.toNumber()).format(),
+    //   marketEndsAt: moment.unix(marketEndsAt.toNumber()).format(),
+    // });
 
-  //   await network.provider.send("evm_setNextBlockTimestamp", [
-  //     moment.unix(marketEndsAt.toNumber()).add(1, "minute").unix(),
-  //   ]);
+    const amount = await getEntryAmount(market);
 
-  //   await expect(
-  //     market.register_player(amount, player.address, prompt)
-  //   ).to.be.revertedWith("ERR_EVENT_ENDED");
-  // });
+    const [, player] = await ethers.getSigners();
+
+    await approveCollateralTokenSpending(
+      collateralToken,
+      player,
+      market.address,
+      amount
+    );
+
+    const prompt = "Sample Prompt";
+
+    await network.provider.send("evm_setNextBlockTimestamp", [
+      moment.unix(marketEndsAt.toNumber()).add(1, "minute").unix(),
+    ]);
+
+    await expect(
+      market.register_player(player.address, prompt)
+    ).to.be.revertedWith("ERR_EVENT_ENDED");
+  });
 
   it("register_player: error on ERC20InsufficientAllowance", async () => {
     const { market, collateralToken } = await createMarketContracts();
