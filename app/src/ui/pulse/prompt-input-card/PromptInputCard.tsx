@@ -28,6 +28,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ onClose }) => {
   const negativePrompt = formState.values.negative_prompt;
   const [isLoading, setIsLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageScore, setImageScore] = useState<number>(0);
 
   useEffect(() => {
     if (prompt) {
@@ -39,6 +40,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ onClose }) => {
         .then((data) => {
           if (data.imageUrl) {
             setImageUrl(data.imageUrl);
+            setImageScore(data?.score ?? 0);
           }
           setIsLoading(false);
         })
@@ -64,6 +66,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ onClose }) => {
         <Modal.Content>
           {isLoading && <p>Loading...</p>}
           {!isLoading && imageUrl && <img src={imageUrl} alt="preview" />}
+          {!isLoading && <p>Score is: {imageScore}</p>}
         </Modal.Content>
       )}
     </Modal>
