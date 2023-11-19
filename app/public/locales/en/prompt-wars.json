@@ -23,6 +23,7 @@
   "promptWars.placeholder.writePromptHere": "Write your prompt here…",
   "promptWars.description.submittingChargesUsdt": "Submitting your prompt will charge USDT",
   "promptWars.button.connectToPlay": "Connect to play",
+  "promptWars.button.preview": "Preview",
   "promptWars.button.submitPrompt": "Submit Prompt",
   "promptWars.button.submitPrompt.loading": "Submitting",
   "promptWars.button.createNewGame": "Create a new game",
