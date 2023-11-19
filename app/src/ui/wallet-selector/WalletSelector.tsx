@@ -6,8 +6,6 @@ import { useAccount } from "wagmi";
 import { Button } from "../button/Button";
 import { Typography } from "ui/typography/Typography";
 import { Icon } from "ui/icon/Icon";
-// import { useNearWalletSelectorContext } from "context/near/wallet-selector/useNearWalletSelectorContext";
-// import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 
 import { WalletSelectorProps } from "./WalletSelector.types";
 import styles from "./WalletSelector.module.scss";
