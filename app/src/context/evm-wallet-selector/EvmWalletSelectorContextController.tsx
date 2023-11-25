@@ -36,7 +36,7 @@ export const EvmWalletSelectorContextController = ({ children }: EvmWalletSelect
 
   return (
     <EvmWalletSelectorContext.Provider value={props}>
-      <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+      <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>
     </EvmWalletSelectorContext.Provider>
   );
 };
