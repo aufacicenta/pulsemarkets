@@ -1,0 +1,13 @@
+import { useContext } from "react";
+
+import { {{pascalCase name}}Context } from "./{{pascalCase name}}Context";
+
+export const use{{pascalCase name}}Context = () => {
+  const context = useContext({{pascalCase name}}Context);
+
+  if (context === undefined) {
+    throw new Error("use{{pascalCase name}}Context must be used within a {{pascalCase name}}Context");
+  }
+
+  return context;
+};

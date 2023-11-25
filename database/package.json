@@ -1,0 +1,34 @@
+{
+  "name": "@aufacicenta/fileagent-db",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:up": "echo creating && npm run db:create && echo created && npm run db:migrate && echo migrated",
+    "db:reset": "npm run db:drop && npm run db:up",
+    "db:create": "sequelize db:create",
+    "db:drop": "[[ $NODE_ENV == production ]] && exit 1 || sequelize db:drop",
+    "db:migrate": "sequelize db:migrate",
+    "db:rollback": "sequelize db:migrate:undo",
+    "db:rollback:all": "sequelize db:migrate:undo:all",
+    "build": "tsc",
+    "start": "node ./dist/server.js",
+    "dev": "tsc-watch --onSuccess \"node ./dist/server.js\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/pg": "^8.10.5",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.16.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "@types/validator": "^13.7.1",
+    "sequelize-cli": "^6.4.1",
+    "tsc-watch": "^4.6.0",
+    "typescript": "^4.5.5"
+  }
+}

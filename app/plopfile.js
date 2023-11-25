@@ -4,8 +4,52 @@ const path = require("path");
 const generatorTypes = {
   REACT_COMPONENT: "React component",
   CUSTOM_HOOK: "Custom hook",
+  CUSTOM_CONTEXT: "Custom context",
   PAGE: "Next.js page",
 };
+
+const customContextGenerator = () => ({
+  description: generatorTypes.CUSTOM_HOOK,
+  prompts: [
+    {
+      type: "directory",
+      name: "directory",
+      message: "select directory",
+      basePath: "./src",
+    },
+    {
+      type: "input",
+      name: "name",
+      message: "context name. exclude 'context'",
+    },
+  ],
+  actions: () => {
+    const actions = [
+      {
+        type: "add",
+        path: "src/{{directory}}/{{name}}/{{pascalCase name}}Context.tsx",
+        templateFile: "plop-templates/context/context.hbs",
+      },
+      {
+        type: "add",
+        path: "src/{{directory}}/{{name}}/{{pascalCase name}}Context.types.ts",
+        templateFile: "plop-templates/context/context.types.hbs",
+      },
+      {
+        type: "add",
+        path: "src/{{directory}}/{{name}}/{{pascalCase name}}ContextController.tsx",
+        templateFile: "plop-templates/context/contextController.tsx.hbs",
+      },
+      {
+        type: "add",
+        path: "src/{{directory}}/{{name}}/use{{pascalCase name}}Context.tsx",
+        templateFile: "plop-templates/context/useContext.tsx.hbs",
+      },
+    ];
+
+    return actions;
+  },
+});
 
 const customHookGenerator = () => ({
   description: generatorTypes.CUSTOM_HOOK,
@@ -174,5 +218,6 @@ module.exports = (plop) => {
   plop.setPrompt("directory", promptDirectory);
   plop.setGenerator(generatorTypes.REACT_COMPONENT, reactComponentGenerator(plop));
   plop.setGenerator(generatorTypes.CUSTOM_HOOK, customHookGenerator());
+  plop.setGenerator(generatorTypes.CUSTOM_CONTEXT, customContextGenerator());
   plop.setGenerator(generatorTypes.PAGE, pageGenerator());
 };

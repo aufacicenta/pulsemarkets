@@ -1,0 +1,7 @@
+@import "src/theme/base";
+
+.sheet-content {
+  &__close-icon {
+    color: var(--color-typography-text);
+  }
+}

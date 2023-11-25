@@ -1,42 +1,110 @@
-# Prompt Wars
+# AI File Agent
 
-Originally branded as Pulse Markets, Prompt Wars is a decentralized game build on top of NEAR Protocol Rust smart-contracts.
+![AI File Agent screenshot](https://blockchainassetregistry.infura-ipfs.io/ipfs/bafybeigtxmjowf7efxar3lel3kw63hsnogkimmb6azwqcrli55ekswifr4/Screenshot%202023-10-15%20at%2011.52.51.png)
 
-The reasoning behind the game is simple:
+Analyze API and file data with natural language and a nice UI.
 
-> Submit a prompt that will render the image on display, compare all the prompt results with the source image and pay the rewards to the resulting image that is closest to the reference image.
-
-![Prompt Wars screenshot](https://blockchainassetregistry.infura-ipfs.io/ipfs/bafybeidycxac3jfzxd6c66luugcfks2ghuo423ukphdwnet753wy7n7tam/Screenshot%202023-07-07%20at%2012.42.32.png)
-
-Follow [docs.pulsemarkets.org](https://docs.pulsemarkets.org/pulse-markets/) for a broader understanding of the smart-contract Prediction Markets protocol on top of which Prompt Wars is built.
-
+- [Features](#features)
 - [Development](#development)
 - [Launching-client](#launching-client)
-- [Near-config](#near-config)
-- [Rust](#rust)
-- [API](#api)
+- [Debugging](#debugging)
 - [Contributing](#contributing)
+
+<a name="features"/>
+
+## Features
+
+AI File Agent is not only another AI chat UI, it allows you to upload any file and create custom components to render with each message, for example:
+
+```typescript
+messageContext.updateMessage({
+    role: "assistant",
+    content: `File "${file.name}" uploaded successfully. What would you like to do with it?`,
+    beforeContentComponent: (
+        <Typography.Description>
+        NOTE: This file is assigned to a temporary account.{" "}
+        <Typography.Link href="#">Create an account</Typography.Link> to keep it.
+        </Typography.Description>
+    ),
+    afterContentComponent: <MessageFileType.Options file={file} fieldName={FormFieldNames.message} />,
+    type: "file",
+    file,
+    id: messageContext.transformId(file.upload!.uuid),
+});
+```
+
+Then, in the `MessageFileType.tsx` component:
+
+```tsx
+export const MessageFileType = ({ message, className }: MessageFileTypeProps) => {
+  const isSimulationEnabled = message.role === "assistant" && !message.hasInnerHtml;
+
+  const { simulationEnded } = useTypingSimulation(message.content, isSimulationEnabled, `#${message.id}`);
+
+  const progress: number = useSubscription(0, message.file.progressObservable);
+
+  return (
+    <div className={clsx(styles["message-file-type"], className)}>
+      <div>
+        <div className={styles["message-file-type__avatar"]}>
+          <div className={styles["message-file-type__avatar-box"]}>
+            {progress === 100 ? (
+              <Icon name="icon-file-check" />
+            ) : (
+              <CircularProgress color="#ffd74b" percentage={progress} fontSize="21px" />
+            )}
+          </div>
+        </div>
+        <div className={styles["message-file-type__content"]}>
+          {message.beforeContentComponent && simulationEnded && message.beforeContentComponent}
+
+          {!isSimulationEnabled ? (
+            <Typography.Text>{message.content}</Typography.Text>
+          ) : (
+            <Typography.Text id={message.id} />
+          )}
+
+          {message.afterContentComponent && simulationEnded && message.afterContentComponent}
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### Plus
+
+- ✅ Upload any file of any size, display a nice uploading animation all within the chat interface
+- ✅ Standard GoogleAI and OpenAI choice responses. Should work with more LM's in the future
+- ✅ Animated assistant replies (typing animation)
+- ✅ Variable height `textarea`
+- ✅ API authentication handler
+- ✅ `function_call` message type handler to call server-side functions
+- ✅ Custom `label` values to render TSX components upon a given AI reply
+- ✅ Well-typed Typescript interfaces to keep your dev flow groovin'
+- ✅ Mobile-first design
+- ✅ Dark and Light theming
+- ✅ i18n ready
+- ✅ Optional Tailwind CSS components and optional Shadcn UI components
+- ✅ Open-source with paid bounties! 🤑
 
 <a name="development"/>
 
 ## Development
 
-To launch your own instance of Prompt Wars, you can:
-
-1. connect to our Testnet or Mainnet contracts, OR
-2. connect to your own contracts
+Follow `app/README.md` for a detailed explanation of launching the dev environment.
 
 <a name="launching-client"/>
 
 ### Launching the frontend client
 
-The client is a NextJS application that connects to the NEAR Protocol Rust smart-contracts with `near-api-js`.
+The client is a NextJS application.
 
 To launch on `localhost:3003`, first clone this repo and run:
 
 ```
-git@github.com:aufacicenta/pulsemarkets.git
-cd pulsemarkets
+git@github.com:aufacicenta/fileagent.git
+cd fileagent
 yarn
 cd app
 yarn
@@ -45,59 +113,53 @@ yarn dev:debug
 
 You'll need these values in `app/.env`:
 
-```
+```bash
 export NODE_ENV=test
 export NEXT_PUBLIC_ORIGIN="http://localhost:3003"
 
-export NEXT_PUBLIC_INFURA_ID="..." # get it from infura.io, works to upload prompt images to IPFS
+export NEXT_PUBLIC_CHAT_AI_API="googleai" # "googleai" OR "openai"
 
-# Uncomment when ready to prod
-# export NEXT_PUBLIC_DEFAULT_NETWORK_ENV="mainnet"
+# NANONETS, for OCR features: https://nanonets.com/
+export NANONETS_API_KEY="..."
 
-export NEXT_PUBLIC_DEFAULT_NETWORK_ENV="testnet"
+# OPEANAI, if you switch NEXT_PUBLIC_CHAT_AI_API to "openai"
+export OPENAI_API_KEY="..."
 
-export NEAR_SIGNER_PRIVATE_KEY="..." # a private key of your NEAR wallet account. This wallet creates the games and determines the winner
+# SUPABASE, used to store file content after it's read once: https://supabase.com/
+export NEXT_PUBLIC_SUPABASE_URL="..."
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
 
-export REPLICATE_API_TOKEN="..." # get it from replicate.ai, this connects to Stable Diffusion to compare the images
+# DROPBOX, used for the Dropbox Sign API features: https://developers.hellosign.com/api/reference/signature-request/
+export DROPBOX_CLIENT_ID="..."
+export DROPBOX_CLIENT_SECRET="..."
+export DROPBOX_REDIRECT_URI="..."
 
-export NEXT_PUBLIC_WEBSOCKETS_PORT=8000
+# SQUARE, used for the Square API features: https://developer.squareup.com/explorer/square
+export SQUARE_APP_ID="..."
+export SQUARE_APP_SECRET="..."
+export SQUARE_ACCESS_TOKEN="..."
+export SQUARE_OAUTH_ENDPOINT="..."
+
+# GOOGLE, used for googleai authentication: https://cloud.google.com/docs/authentication/provide-credentials-adc
+export GOOGLE_APPLICATION_CREDENTIALS="path to credentials"
+export GOOGLE_PROJECT_ID="..."
+
+# DATABASE, used for the Supabase postgres instance
+export POSTGRES_DB_NAME=postgres
+export POSTGRES_DB_USERNAME=postgres
+export POSTGRES_DB_PASSWORD=...
+export POSTGRES_DB_HOST=...
+export POSTGRES_DB_PORT=5432
 ```
-<a name="near-config"/>
 
-#### NEAR config
+<a name="debugging"/>
 
-All important configuration regarding Testnet and Mainnet smart-contracts is in: `getConfig.ts`.
+### Optional VSCode debugging
 
-Change these values according to your deployment, if needed.
-
-<a name="rust"/>
-
-### Rust smart-contracts development
-
-The main contract is `contracts/prompt-wars/src/contract.rs` (it's Typescript abstraction is `app/src/providers/near/contracts/prompt-wars/contract.ts`).
-
-You can tweak the contract to your needs and deploy it using the NEAR CLI. Update `getConfig.ts` to match your contracts' addresses.
-
-Make sure that the tests pass!
-
-```
-# ./contracts/prompt-wars
-cargo test -- --nocapture
-```
-
-<a name="api"/>
-
-## Creating new games
-
-This is done through the API endpoints:
-
-- `/api/prompt-wars/create` — create new games using the market factory contract (once this is called, it automates the next steps)
-- `/api/prompt-wars/reveal` — compare the prompt results with the source image, store the results in the prompt wars market contract
-- `/api/prompt-wars/resolve` — set the winner
-- `/api/prompt-wars/self-destruct` — get the storage NEAR native balance back
+Instead of `yarn dev:debug`, hit the `F5` key, it should launch the VSCode Debugger in a new terminal session. You may create debug breakpoints on API endpoints, for example.
 
 <a name="contributing"/>
 
 ## Contributing
 
-Check the paid issues in the [Prompt Wars project board](https://github.com/orgs/aufacicenta/projects/2)!
+Check the paid issues in the [AI File Agent project board](https://github.com/orgs/aufacicenta/projects/3/views/1)!

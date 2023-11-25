@@ -1,0 +1,279 @@
+@import "src/theme/base";
+@import "src/theme/button/primary";
+@import "src/ui/fileagent/navbar/variables";
+
+.navbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: $z-index-content;
+  width: 100%;
+  background-color: var(--color-navbar-background);
+
+  &__sidebar-toggle {
+    color: var(--color-typography-text);
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  &__dropdown {
+    @extend .z-depth-1-half;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: $z-index-navigation;
+    display: none;
+    width: 210px;
+    border-bottom-right-radius: $border-radius;
+    border-bottom-left-radius: $border-radius;
+
+    a {
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    &--item {
+      display: flex;
+      border-left: 2px solid var(--color-background);
+      background-color: var(--color-background);
+
+      &:last-child {
+        border-bottom-right-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+      }
+
+      &:hover {
+        border-left: 2px solid var(--color-primary);
+        background-color: var(--color-background-contrast);
+        cursor: pointer;
+      }
+
+      &-icon,
+      &-text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: $space-default;
+      }
+    }
+  }
+
+  &__center--item,
+  &__right--item {
+    &:hover {
+      cursor: pointer;
+
+      :global {
+        .dropdown {
+          display: block;
+        }
+      }
+    }
+  }
+
+  &__logo-mobile,
+  &__logo-desktop {
+    a {
+      @include atLargeTablet {
+        height: $navbar-height;
+      }
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: $navbar-height-mobile;
+    }
+
+    svg,
+    span {
+      color: var(--color-typography-text);
+    }
+
+    span {
+      padding-top: $space-s;
+    }
+  }
+
+  &__logo-mobile {
+    @include atLargeTablet {
+      display: none;
+    }
+
+    svg {
+      width: $navbar-logo-width-mobile;
+    }
+  }
+
+  &__logo-desktop {
+    @include atLargeTablet {
+      display: block;
+    }
+    display: none;
+
+    svg {
+      @include atLargeTablet {
+        width: $navbar-logo-width;
+      }
+    }
+  }
+
+  &__logo {
+    a {
+      @include atLargeTablet {
+        height: $navbar-height;
+      }
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: $navbar-height-mobile;
+    }
+
+    svg {
+      @include atLargeTablet {
+        width: $navbar-logo-width;
+      }
+      width: $navbar-logo-width-mobile;
+    }
+  }
+
+  &__left,
+  &__right,
+  &__center {
+    display: flex;
+    justify-content: flex-end;
+
+    &--item {
+      @include atLargeTablet {
+        height: $navbar-height;
+      }
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: $navbar-height-mobile;
+    }
+  }
+
+  &__left {
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  &__center {
+    @include atTablet {
+      display: flex;
+      justify-content: center;
+    }
+    display: none;
+
+    a {
+      color: var(--color-typography-subtitle);
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    &--item {
+      p {
+        margin: 0;
+        color: var(--color-typography-subtitle);
+      }
+
+      &-dropdown {
+        &:hover {
+          background-color: var(--color-background-contrast);
+        }
+      }
+    }
+  }
+
+  &__right {
+    display: flex;
+    justify-content: flex-end;
+
+    &--trigger {
+      @include atLargeTablet {
+        display: none;
+      }
+      font-size: 24px;
+      color: var(--color-typography-text);
+    }
+
+    &--item {
+      a {
+        margin: 0;
+        font-weight: $font-weight-bold;
+      }
+
+      &:nth-child(n) {
+        margin-left: $space-l;
+        color: var(--color-typography-text);
+      }
+    }
+
+    &--cta {
+      @extend .button-primary;
+
+      @include atLargeTablet {
+        display: block;
+      }
+      @include font-properties($typography-mini-button-label);
+      display: none;
+      padding: $space-s 20px;
+    }
+  }
+
+  &__language-selector {
+    display: flex;
+    border-radius: $border-radius;
+    padding: $space-xs;
+    font-size: $font-size-2;
+    color: var(--color-button-secondary-text);
+    background-color: var(--color-button-secondary);
+
+    a {
+      display: flex;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    &:hover {
+      background-color: var(--color-button-secondary-hover);
+      cursor: pointer;
+    }
+
+    svg {
+      width: 14px;
+      height: auto;
+      margin-right: $space-xs;
+      color: var(--color-button-secondary-text);
+    }
+  }
+
+  &__account-widget {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 42px;
+    height: 42px;
+    border: 2px solid var(--color-secondary);
+    border-radius: 50%;
+
+    &:hover {
+      background-color: var(--color-background-contrast);
+    }
+  }
+
+  &__pill {
+    @include atLargeTablet {
+      display: block;
+    }
+    display: none;
+  }
+}

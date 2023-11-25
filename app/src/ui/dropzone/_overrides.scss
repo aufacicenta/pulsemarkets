@@ -1,0 +1,24 @@
+.dropzone {
+  .dz-preview {
+    display: none;
+  }
+
+  &.dz-clickable {
+    font-size: 28px;
+  }
+
+  &.dz-started {
+    .dz-message {
+      display: flex;
+    }
+  }
+
+  .dz-message {
+    margin: inherit;
+    text-align: inherit;
+  }
+
+  &.dz-drag-hover {
+    border: 2px dotted var(--color-dropzone-border-hover);
+  }
+}
