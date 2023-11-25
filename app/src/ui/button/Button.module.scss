@@ -376,13 +376,29 @@ $HALF_LOADER_SIZE: 15px;
     }
 
     &.button--danger {
-      border-color: var(--color-status-critical);
-      color: var(--color-status-critical);
+      border-color: var(--color-button-status-critical);
+      color: var(--color-button-status-critical-text);
 
       &:active,
       &:hover,
       &:focus {
-        color: var(--color-white);
+        border-color: var(--color-button-status-critical-hover);
+        color: var(--color-button-status-critical-hover-text);
+        background: var(--color-button-status-critical-hover);
+      }
+
+      &[disabled] {
+        border-color: var(--color-dark-1);
+        color: var(--color-dark-1);
+        background-color: var(--color-white);
+
+        &:active,
+        &:hover,
+        &:focus {
+          border-color: var(--color-button-status-critical-hover);
+          color: var(--color-button-status-critical-text);
+          background: var(--color-button-status-critical-hover);
+        }
       }
     }
 

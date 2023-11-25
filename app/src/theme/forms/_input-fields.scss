@@ -39,6 +39,7 @@ textarea.materialize-textarea {
   &[readonly="readonly"] {
     border-bottom: $input-disabled-border;
     color: $input-disabled-color;
+    background-color: var(--color-input-background-disabled);
   }
 
   // Disabled label style

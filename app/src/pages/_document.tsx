@@ -19,14 +19,14 @@ export default function Document() {
 
         {process.env.NODE_ENV === "production" && (
           <>
-            <Script async src="https://www.googletagmanager.com/gtag/js?id=G-T6PR3QEEGR" />
+            <Script async src="https://www.googletagmanager.com/gtag/js?id=G-FKZJ5CT2JZ" />
             <Script id="google-analytics">
               {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
 
-              gtag('config', 'G-T6PR3QEEGR');
+              gtag('config', 'G-FKZJ5CT2JZ');
             `}
             </Script>
           </>

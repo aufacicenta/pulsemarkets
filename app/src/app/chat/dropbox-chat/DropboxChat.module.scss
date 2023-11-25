@@ -1,0 +1,98 @@
+@import "src/theme/base";
+@import "src/theme/forms/variables";
+@import "src/ui/fileagent/navbar/variables";
+
+@mixin width {
+  @include atLargeTablet {
+    max-width: 50vw;
+    margin: 0 auto;
+  }
+}
+
+.dropbox-chat {
+  position: relative;
+  display: block;
+  min-height: 100vh;
+
+  &__textarea {
+    @include atLargeTablet {
+      padding: $space-l;
+      padding-top: 0;
+    }
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-top: 1px solid var(--color-horizontal-line-background);
+    padding: $space-default;
+    padding-top: 0;
+    background-color: var(--color-background);
+
+    &--actions {
+      @include width;
+      display: flex;
+      justify-content: flex-end;
+      padding: $space-s;
+
+      button {
+        margin-left: $space-default;
+      }
+    }
+
+    &--card {
+      @include width;
+    }
+
+    &--card-actions {
+      @include atLargeTablet {
+        flex-direction: row;
+      }
+      flex-direction: column;
+      padding-top: 0;
+
+      &-button {
+        @include atLargeTablet {
+          margin-left: $space-default;
+        }
+        margin-left: auto;
+      }
+    }
+
+    &--card-field {
+      min-height: 63px;
+      padding: $space-default !important;
+      font-size: $input-font-size !important;
+      background-color: var(--color-market-card-background);
+      transition: height 0.2s ease-in-out;
+    }
+  }
+
+  &__messages {
+    @include atLargeTablet {
+      padding-top: $navbar-height;
+      padding-bottom: 270px;
+    }
+    padding-top: $navbar-height-mobile;
+    padding-bottom: 280px;
+    overflow-y: scroll;
+
+    &--item {
+      border-bottom: 1px solid var(--color-horizontal-line-background);
+
+      > div {
+        @include width;
+        display: flex;
+        padding-top: $space-m;
+      }
+
+      &:nth-child(odd) {
+        background-color: var(--color-background-contrast);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}

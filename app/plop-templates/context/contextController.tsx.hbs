@@ -1,0 +1,12 @@
+import React, { useState } from "react";
+
+import { {{pascalCase name}}Context } from "./{{pascalCase name}}Context";
+import { {{pascalCase name}}ContextControllerProps, {{pascalCase name}}ContextType } from "./{{pascalCase name}}Context.types";
+
+export const {{pascalCase name}}ContextController = ({ children }: {{pascalCase name}}ContextControllerProps) => {
+  const [state, setState] = useState(undefined);
+
+  const props: {{pascalCase name}}ContextType = {};
+
+  return <{{pascalCase name}}Context.Provider value={props}>{children}</{{pascalCase name}}Context.Provider>;
+};

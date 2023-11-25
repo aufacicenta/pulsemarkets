@@ -1,0 +1,77 @@
+@import "src/theme/base";
+@import "src/ui/fileagent/chat-sidebar/variables";
+@import "src/ui/fileagent/navbar/variables";
+@import "src/ui/typography/variables";
+
+.chat-sidebar {
+  &__sheet-content {
+    padding: 0;
+  }
+
+  &__sheet-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid var(--color-background-contrast);
+    padding: $space-default;
+
+    > div {
+      margin-left: $space-default;
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: $navbar-height;
+    padding: $space-default;
+
+    &--toggle {
+      color: var(--color-typography-text);
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+
+  h6 {
+    margin: 0;
+
+    span {
+      font-size: $font-size-mini-description;
+    }
+  }
+
+  &__thread {
+    &--item {
+      padding: $space-xs $space-default;
+
+      &:hover {
+        background-color: var(--color-chat-sidebar-background-hover);
+        cursor: pointer;
+      }
+    }
+  }
+
+  &__files {
+    max-height: 240px;
+    overflow-y: scroll;
+  }
+
+  &__file {
+    &--item {
+      padding: $space-xs $space-default;
+
+      &:hover {
+        background-color: var(--color-chat-sidebar-background-hover);
+      }
+
+      &-options {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+}

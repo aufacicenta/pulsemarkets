@@ -5,9 +5,13 @@ function get<T>(key: string): T | null {
     return null;
   }
 
-  const value = JSON.parse(item);
+  try {
+    const value = JSON.parse(item);
 
-  return value;
+    return value;
+  } catch {
+    return item as unknown as T;
+  }
 }
 
 const set = (key: string, value: unknown = {}) => {

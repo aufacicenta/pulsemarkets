@@ -1,0 +1,39 @@
+@import "src/theme/base";
+@import "src/ui/typography/variables";
+
+.dropzone {
+  @include atLargeTablet {
+    margin-bottom: 0;
+  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: auto;
+  margin-bottom: $space-default;
+  border: 2px dotted var(--color-dropzone-border);
+  border-radius: $border-radius-input;
+  padding: $space-s;
+  text-align: left;
+  background: transparent;
+
+  &__message {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    color: var(--color-typography-description);
+
+    span {
+      font-size: $font-size-headline-3 !important;
+    }
+
+    em {
+      font-style: normal;
+      color: var(--color-typography-link);
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+}

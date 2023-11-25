@@ -7,6 +7,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   strokeWidth = 20,
   percentage = 25,
   color = "#153fbd",
+  fontSize = "16px",
 }) => {
   const [progress, setProgress] = useState(0);
 
@@ -34,7 +35,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         strokeLinecap="round"
         style={{ transition: "all 0.5s" }}
       />
-      <text fill={color} fontSize="16px" x="50%" y="50%" dy="6px" textAnchor="middle">
+      <text fill={color} fontSize={fontSize} x="50%" y="50%" dy="6px" textAnchor="middle">
         {`${percentage}%`}
       </text>
     </svg>

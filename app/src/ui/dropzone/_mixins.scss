@@ -1,0 +1,111 @@
+@import "src/ui/typography/mixins";
+@import "src/ui/table/variables";
+@import "src/ui/table/mixins";
+
+@mixin avatar {
+  &__avatar {
+    padding: $space-default;
+    color: var(--color-primary);
+
+    &-box {
+      @extend .z-depth-3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: var(--color-background);
+
+      svg {
+        stroke: var(--color-primary);
+      }
+
+      span {
+        font-size: 21px;
+        font-weight: 400;
+      }
+    }
+  }
+}
+@mixin content {
+  &__content {
+    width: 100%;
+    padding: $space-default;
+
+    > div {
+      @include tableResponsive;
+    }
+
+    table {
+      @include table;
+      @include tableStripped;
+      @include tableSm;
+      border-radius: $border-radius;
+      color: var(--color-background);
+      background-color: var(--color-table-background);
+    }
+
+    h1 {
+      @include headline1();
+    }
+
+    h2 {
+      @include headline2();
+    }
+
+    h3 {
+      @include headline3();
+    }
+
+    h4 {
+      @include headline4();
+    }
+
+    h5 {
+      @include headline5();
+    }
+
+    h6 {
+      @include headline6();
+    }
+
+    p {
+      @include text();
+      white-space: pre-line;
+      word-break: break-word;
+      hyphens: auto;
+
+      a {
+        color: var(--color-primary);
+      }
+    }
+  }
+}
+@mixin options {
+  &__options {
+    @include atLargeTablet {
+      button {
+        &:nth-child(n + 2) {
+          margin-left: $space-default;
+        }
+      }
+    }
+    display: flex;
+    flex-wrap: wrap;
+
+    button {
+      margin-right: $space-default;
+      margin-bottom: $space-default;
+    }
+
+    &--dropbox-button {
+      background-color: #0061fe;
+
+      > div {
+        color: #fff;
+      }
+    }
+  }
+}

@@ -4,4 +4,5 @@ export type CircularProgressProps = {
   strokeWidth?: number;
   percentage?: number;
   color?: string;
+  fontSize?: string;
 };

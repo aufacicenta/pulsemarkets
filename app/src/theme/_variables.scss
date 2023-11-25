@@ -3,10 +3,10 @@
 // Variables should follow the `$component-state-property-size` formula for
 // consistent naming. Ex: $nav-link-disabled-color and $modal-content-box-shadow-xs.
 
-$navbar-height: 98px;
-$navbar-height-mobile: 80px;
-$navbar-logo-width: 124px;
-$navbar-logo-width-mobile: 70px;
+$navbar-height: 98px !default;
+$navbar-height-mobile: 80px !default;
+$navbar-logo-width: 124px !default;
+$navbar-logo-width-mobile: 70px !default;
 
 $sidebar-width: 82px;
 $sidebar-width-open: 210px;
