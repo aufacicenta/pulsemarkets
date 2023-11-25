@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { useEffect } from "react";
 import { useTranslation } from "next-i18next";
+import { useAccount } from "wagmi";
 
 import { useNearMarketContractContext } from "context/near/market-contract/useNearMarketContractContext";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { Typography } from "ui/typography/Typography";
 import { Card } from "ui/card/Card";
 import currency from "providers/currency";
@@ -12,14 +12,14 @@ import styles from "./OutcomeTokensPosition.module.scss";
 import { OutcomeTokensPositionProps } from "./OutcomeTokensPosition.types";
 
 export const OutcomeTokensPosition: React.FC<OutcomeTokensPositionProps> = ({ className }) => {
-  const walletState = useWalletStateContext();
+  const { isConnected } = useAccount();
 
   const { marketContractValues, calculateTotalOutcomeTokensPosition, outcomeTokensExtended } =
     useNearMarketContractContext();
 
   useEffect(() => {
     calculateTotalOutcomeTokensPosition();
-  }, [marketContractValues, walletState.isConnected]);
+  }, [marketContractValues, isConnected]);
 
   const { t } = useTranslation(["prompt-wars"]);
 

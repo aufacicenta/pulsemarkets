@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import Countdown from "react-countdown";
 import { useTranslation } from "next-i18next";
+import { useAccount } from "wagmi";
 
 import { Card } from "ui/card/Card";
 import { Grid } from "ui/grid/Grid";
@@ -10,7 +11,6 @@ import near from "providers/near";
 import currency from "providers/currency";
 import { PromptWarsMarketContractStatus } from "providers/near/contracts/prompt-wars/prompt-wars.types";
 import ipfs from "providers/ipfs";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { Button } from "ui/button/Button";
 
 import { ImgPromptCardProps } from "./ImgPromptCard.types";
@@ -25,7 +25,7 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
   onClickSeeResults,
   onClickCreateNewGame,
 }) => {
-  const walletState = useWalletStateContext();
+  const { address } = useAccount();
 
   const { market, resolution, outcomeIds, collateralToken, status } = marketContractValues;
 
@@ -127,13 +127,9 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
                     <Typography.Description>{t("promptWars.status.description.status")}</Typography.Description>
                     {getStatusElement()}
                     <Typography.Description>{t("promptWars.status.description.participants")}</Typography.Description>
-                    <Typography.Text flat={outcomeIds.includes(walletState.address as string)}>
-                      {outcomeIds.length}
-                    </Typography.Text>
+                    <Typography.Text flat={outcomeIds.includes(address as string)}>{outcomeIds.length}</Typography.Text>
                     <Typography.MiniDescription>
-                      {outcomeIds.includes(walletState.address as string)
-                        ? t("promptWars.status.description.youReIn")
-                        : null}
+                      {outcomeIds.includes(address as string) ? t("promptWars.status.description.youReIn") : null}
                     </Typography.MiniDescription>
                     <Typography.Description>{t("promptWars.status.description.totalPriceBag")}</Typography.Description>
                     <Typography.Text flat>

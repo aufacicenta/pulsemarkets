@@ -2,14 +2,14 @@ import clsx from "clsx";
 import { Field, Form as RFForm } from "react-final-form";
 import { useState } from "react";
 import { useTranslation } from "next-i18next";
+import { useAccount } from "wagmi";
+import { useNearWalletSelectorContext } from "context/near/wallet-selector/useNearWalletSelectorContext";
 
 import { Card } from "ui/card/Card";
 import { Typography } from "ui/typography/Typography";
 import { Button } from "ui/button/Button";
 import { Icon } from "ui/icon/Icon";
 import { PromptWarsMarketContractStatus } from "providers/near/contracts/prompt-wars/prompt-wars.types";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
-import { useNearWalletSelectorContext } from "context/near/wallet-selector/useNearWalletSelectorContext";
 import currency from "providers/currency";
 import pulse from "providers/pulse";
 import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars-market-contract/useNearPromptWarsMarketContractContext";
@@ -24,8 +24,8 @@ export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   marketContractValues,
 }) => {
   const [isNegativePromptFieldVisible, displayNegativePromptField] = useState(false);
+  const { isConnected } = useAccount();
 
-  const wallet = useWalletStateContext();
   const nearWalletSelectorContext = useNearWalletSelectorContext();
 
   const { actions } = useNearPromptWarsMarketContractContext();
@@ -85,7 +85,7 @@ export const PromptInputCard: React.FC<PromptInputCardProps> = ({
             </Card.Content>
             <Card.Actions className={styles["prompt-input-card__actions"]}>
               <div>
-                {!wallet.isConnected ? (
+                {!isConnected ? (
                   <Button color="secondary" variant="outlined" onClick={handleOnDisplayWidgetClick}>
                     {t("promptWars.button.connectToPlay")}
                   </Button>
