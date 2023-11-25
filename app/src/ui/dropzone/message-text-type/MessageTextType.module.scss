@@ -1,0 +1,19 @@
+@import "src/theme/base";
+@import "src/ui/dropzone/mixins";
+
+.message-text-type {
+  @include avatar;
+  @include content;
+  @include options;
+  display: block;
+
+  &__loading-spinner {
+    width: 21px;
+    height: 21px;
+  }
+
+  &__static-options {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

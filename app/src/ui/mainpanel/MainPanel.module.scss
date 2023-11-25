@@ -1,7 +1,6 @@
 @import "src/theme/base";
 
 .main-panel {
-  @include withNavbar;
   @include atLargeTablet {
     min-height: 100vh;
     overflow-y: auto;
@@ -9,6 +8,10 @@
   position: relative;
   width: 100%;
   background-color: var(--color-background);
+
+  &--with-navbar {
+    @include withNavbar;
+  }
 
   &__container {
     @include withNavbar(5);

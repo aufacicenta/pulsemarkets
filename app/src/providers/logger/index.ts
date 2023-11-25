@@ -5,7 +5,9 @@ const { combine, timestamp, printf, splat, colorize } = format;
 const myFormat = printf((info) => {
   let { message } = info;
 
-  if (typeof info.message === "object") {
+  if (info.level === "error") {
+    message = info.message;
+  } else if (typeof info.message === "object") {
     message = JSON.stringify(info.message, null, 2);
   }
 
@@ -13,7 +15,7 @@ const myFormat = printf((info) => {
 });
 
 const logger = createLogger({
-  format: combine(timestamp(), myFormat, splat(), colorize()),
+  format: combine(format.errors({ stack: true }), timestamp(), myFormat, splat(), colorize()),
   transports: [new transports.Console()],
 });
 

@@ -8,7 +8,7 @@ import { Icon } from "ui/icon/Icon";
 import { LocaleSelectorProps } from "./LocaleSelector.types";
 import styles from "./LocaleSelector.module.scss";
 
-export const LocaleSelector: React.FC<LocaleSelectorProps> = ({ className }) => {
+export const LocaleSelector: React.FC<LocaleSelectorProps> = ({ className, fixed }) => {
   const { locale, locales, asPath } = useRouter();
   const [nextLocale, setNextLocale] = useState<string | undefined>(undefined);
 
@@ -24,7 +24,11 @@ export const LocaleSelector: React.FC<LocaleSelectorProps> = ({ className }) => 
   }, [getNextLocale]);
 
   return (
-    <div className={clsx(styles["locale-selector"], className)}>
+    <div
+      className={clsx(styles["locale-selector"], className, {
+        [styles["locale-selector__fixed"]]: fixed,
+      })}
+    >
       <Typography.Link href={asPath} locale={nextLocale}>
         <Icon name="icon-network" /> {nextLocale}
       </Typography.Link>

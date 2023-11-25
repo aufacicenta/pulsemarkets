@@ -4,10 +4,15 @@ import React from "react";
 import styles from "./MainPanel.module.scss";
 import { MainPanelContainerProps, MainPanelProps } from "./MainPanel.types";
 
-export const MainPanel: React.FC<MainPanelProps> & { Container: React.FC<MainPanelContainerProps> } = ({
-  children,
-  className,
-}) => <main className={clsx(styles["main-panel"], className)}>{children}</main>;
+export const MainPanel = ({ children, className, withNavBar }: MainPanelProps) => (
+  <main
+    className={clsx(styles["main-panel"], className, {
+      [styles["main-panel--with-navbar"]]: withNavBar,
+    })}
+  >
+    {children}
+  </main>
+);
 
 const Container: React.FC<MainPanelContainerProps> = ({ children, className, paddingX }) => (
   <div
