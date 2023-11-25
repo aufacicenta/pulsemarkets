@@ -12,8 +12,9 @@ import { WalletStateContextController } from "context/wallet/state/WalletStateCo
 import { NearMarketFactoryContractContextController } from "context/near/market-factory-contract/NearMarketFactoryContractContextController";
 import { NearPromptWarsMarketContractContextController } from "context/near/prompt-wars-market-contract/NearPromptWarsMarketContractContextController";
 import { Footer } from "ui/footer/Footer";
-import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
 import { useLocalStorage } from "hooks/useLocalStorage/useLocalStorage";
+import { ThemeContextController } from "context/theme/ThemeContextController";
+import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
@@ -24,11 +25,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
   const { locale } = useRouter();
 
   const ls = useLocalStorage();
-
-  useEffect(() => {
-    // @todo set with a toggle button from navbar or footer
-    document.body.dataset.theme = "dark";
-  }, []);
 
   useEffect(() => {
     if (ls.get("promptwars_wallet_auth_key") === null) {
@@ -42,45 +38,45 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
     <>
       <Head>
         <link rel="icon" href="/favicon.ico" as="image" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <meta property="og:image" content="/shared/pulse.png" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content={locale} />
       </Head>
-      <WalletStateContextController>
-        <NearWalletSelectorContextController>
-          <ToastContextController>
-            <NearMarketFactoryContractContextController>
-              <NearPromptWarsMarketContractContextController marketId={marketId}>
-                <div id="modal-root" />
-                <div id="dropdown-portal" />
-                <div
-                  className={clsx(styles["dashboard-layout"], {
-                    [styles["dashboard-layout__with-top-alert"]]: false,
-                  })}
-                >
-                  <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
+      <ThemeContextController>
+        <WalletStateContextController>
+          <NearWalletSelectorContextController>
+            <ToastContextController>
+              <NearMarketFactoryContractContextController>
+                <NearPromptWarsMarketContractContextController marketId={marketId}>
+                  <div id="modal-root" />
+                  <div id="dropdown-portal" />
+                  <div
+                    className={clsx(styles["dashboard-layout"], {
+                      [styles["dashboard-layout__with-top-alert"]]: false,
+                    })}
+                  >
+                    <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
 
-                  <LocaleSelector />
+                    <LocaleSelector fixed />
 
-                  <PulseSidebar
-                    isOpen={isSidebarOpen}
-                    handleOpen={() => setSidebarVisibility(true)}
-                    handleClose={() => setSidebarVisibility(false)}
-                  />
+                    <PulseSidebar
+                      isOpen={isSidebarOpen}
+                      handleOpen={() => setSidebarVisibility(true)}
+                      handleClose={() => setSidebarVisibility(false)}
+                    />
 
-                  <MainPanel withNavBar>
-                    {children}
+                    <MainPanel withNavBar>
+                      {children}
 
-                    <Footer />
-                  </MainPanel>
-                </div>
-              </NearPromptWarsMarketContractContextController>
-            </NearMarketFactoryContractContextController>
-          </ToastContextController>
-        </NearWalletSelectorContextController>
-      </WalletStateContextController>
+                      <Footer />
+                    </MainPanel>
+                  </div>
+                </NearPromptWarsMarketContractContextController>
+              </NearMarketFactoryContractContextController>
+            </ToastContextController>
+          </NearWalletSelectorContextController>
+        </WalletStateContextController>
+      </ThemeContextController>
     </>
   );
 };

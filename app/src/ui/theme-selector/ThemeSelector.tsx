@@ -19,7 +19,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ className, fixed }
       role="button"
       tabIndex={0}
     >
-      <Icon name={theme === "fileagent" ? "icon-moon-2" : "icon-sun"} className={styles["theme-selector__icon"]} />
+      <Icon name={theme === "dark" ? "icon-moon-2" : "icon-sun"} className={styles["theme-selector__icon"]} />
     </div>
   );
 };

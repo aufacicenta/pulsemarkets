@@ -7,10 +7,10 @@ import { LocalStorageKeys } from "hooks/useLocalStorage/useLocalStorage.types";
 import { ThemeContext } from "./ThemeContext";
 import { ThemeContextControllerProps } from "./ThemeContext.types";
 
-const themes: Theme[] = ["fileagent", "fileagent-dark"];
+const themes: Theme[] = ["dark", "light"];
 
 export const ThemeContextController = ({ children }: ThemeContextControllerProps) => {
-  const [theme, setTheme] = useState<Theme>("fileagent");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   const localStorage = useLocalStorage();
 

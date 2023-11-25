@@ -120,4 +120,8 @@ body[data-theme="dark"] {
   // Dropzone
   --color-dropzone-border: #3c3c3c;
   --color-dropzone-border-hover: var(--color-input-label);
+
+  // Modal
+  --color-modal-overlay: var(--color-black);
+  --opacity-modal-overlay: 0.8;
 }
