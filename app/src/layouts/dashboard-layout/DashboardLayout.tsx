@@ -15,6 +15,7 @@ import { Footer } from "ui/footer/Footer";
 import { useLocalStorage } from "hooks/useLocalStorage/useLocalStorage";
 import { ThemeContextController } from "context/theme/ThemeContextController";
 import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
+import { EvmWalletSelectorContextController } from "context/evm-wallet-selector/EvmWalletSelectorContextController";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
@@ -43,39 +44,41 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
         <meta property="og:locale" content={locale} />
       </Head>
       <ThemeContextController>
-        <WalletStateContextController>
-          <NearWalletSelectorContextController>
-            <ToastContextController>
-              <NearMarketFactoryContractContextController>
-                <NearPromptWarsMarketContractContextController marketId={marketId}>
-                  <div id="modal-root" />
-                  <div id="dropdown-portal" />
-                  <div
-                    className={clsx(styles["dashboard-layout"], {
-                      [styles["dashboard-layout__with-top-alert"]]: false,
-                    })}
-                  >
-                    <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
+        <EvmWalletSelectorContextController>
+          <WalletStateContextController>
+            <NearWalletSelectorContextController>
+              <ToastContextController>
+                <NearMarketFactoryContractContextController>
+                  <NearPromptWarsMarketContractContextController marketId={marketId}>
+                    <div id="modal-root" />
+                    <div id="dropdown-portal" />
+                    <div
+                      className={clsx(styles["dashboard-layout"], {
+                        [styles["dashboard-layout__with-top-alert"]]: false,
+                      })}
+                    >
+                      <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
 
-                    <LocaleSelector fixed />
+                      <LocaleSelector fixed />
 
-                    <PulseSidebar
-                      isOpen={isSidebarOpen}
-                      handleOpen={() => setSidebarVisibility(true)}
-                      handleClose={() => setSidebarVisibility(false)}
-                    />
+                      <PulseSidebar
+                        isOpen={isSidebarOpen}
+                        handleOpen={() => setSidebarVisibility(true)}
+                        handleClose={() => setSidebarVisibility(false)}
+                      />
 
-                    <MainPanel withNavBar>
-                      {children}
+                      <MainPanel withNavBar>
+                        {children}
 
-                      <Footer />
-                    </MainPanel>
-                  </div>
-                </NearPromptWarsMarketContractContextController>
-              </NearMarketFactoryContractContextController>
-            </ToastContextController>
-          </NearWalletSelectorContextController>
-        </WalletStateContextController>
+                        <Footer />
+                      </MainPanel>
+                    </div>
+                  </NearPromptWarsMarketContractContextController>
+                </NearMarketFactoryContractContextController>
+              </ToastContextController>
+            </NearWalletSelectorContextController>
+          </WalletStateContextController>
+        </EvmWalletSelectorContextController>
       </ThemeContextController>
     </>
   );
