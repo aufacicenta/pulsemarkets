@@ -1,57 +1,53 @@
 import clsx from "clsx";
 import { useTranslation } from "next-i18next";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useAccount } from "wagmi";
 
 import { Button } from "../button/Button";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { BalancePill } from "ui/pulse/sidebar/balance-pill/BalancePill";
 import { Typography } from "ui/typography/Typography";
 import { Icon } from "ui/icon/Icon";
-import { useNearWalletSelectorContext } from "context/near/wallet-selector/useNearWalletSelectorContext";
 
 import styles from "./WalletSelector.module.scss";
 import { WalletSelectorProps } from "./WalletSelector.types";
 
 export const WalletSelectorMobile: React.FC<WalletSelectorProps> = ({ className }) => {
-  const wallet = useWalletStateContext();
-  const nearWalletSelectorContext = useNearWalletSelectorContext();
+  const { open } = useWeb3Modal();
+  const { address, isConnected } = useAccount();
 
   const { t } = useTranslation(["prompt-wars"]);
 
   const handleOnConnectWalletClick = () => {
-    if (!wallet.isConnected) {
-      nearWalletSelectorContext.modal?.show();
+    if (isConnected) {
+      open({ view: "Account" });
     } else {
-      nearWalletSelectorContext.signOut();
+      open();
     }
   };
 
   return (
     <div className={clsx(styles["wallet-selector__mobile"], className)}>
       <Button
-        size="xs"
-        color={wallet.actions.isGettingGuestWallet ? "success" : "primary"}
+        size="s"
+        color="primary"
         variant="outlined"
         onClick={handleOnConnectWalletClick}
         className={styles["wallet-selector__mobile--button"]}
-        animate={wallet.actions.isGettingGuestWallet ? "pulse" : undefined}
-        rightIcon={<Icon name={wallet.address ? "icon-power" : "icon-power-crossed"} />}
+        animate={undefined}
+        rightIcon={<Icon name={address ? "icon-power" : "icon-power-crossed"} />}
       >
-        {wallet.isConnected ? (
+        {isConnected ? (
           <Typography.Text inline truncate flat>
-            {wallet.address}
+            {address}
           </Typography.Text>
         ) : (
-          <>
-            {wallet.actions.isGettingGuestWallet
-              ? t("promptWars.walletSelector.isSettingGuestWallet")
-              : t("promptWars.connectWallet")}
-          </>
+          <>{t("promptWars.connectWallet")}</>
         )}
       </Button>
 
-      {wallet.isConnected ? <BalancePill /> : null}
+      {isConnected ? <BalancePill /> : null}
 
-      {wallet.isConnected ? (
+      {isConnected ? (
         <Typography.Description
           flat
           onClick={handleOnConnectWalletClick}

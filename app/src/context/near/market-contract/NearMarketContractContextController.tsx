@@ -1,6 +1,7 @@
+// TODO: do we need this file ?
 import React, { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import {
   BalanceOfArgs,
   GetAmountMintableArgs,
@@ -35,7 +36,16 @@ export const NearMarketContractContextController = ({
   });
 
   const toast = useToastContext();
-  const walletState = useWalletStateContext();
+
+  const { isConnected, address } = useAccount();
+
+  // TODO:
+  const walletState = {
+    context: {
+      connection: null,
+      wallet: null,
+    },
+  };
 
   const fetchMarketContractValues = async () => {
     setActions((prev) => ({
@@ -153,7 +163,7 @@ export const NearMarketContractContextController = ({
   }, [marketContractValues?.price]);
 
   const assertWalletConnection = () => {
-    if (!walletState.isConnected) {
+    if (!isConnected) {
       toast.trigger({
         variant: "info",
         withTimeout: true,
@@ -255,12 +265,12 @@ export const NearMarketContractContextController = ({
   };
 
   const calculateTotalOutcomeTokensPosition = async () => {
-    if (!walletState.isConnected || !marketContractValues?.outcomeTokens) {
+    if (!isConnected || !marketContractValues?.outcomeTokens) {
       return;
     }
 
     const promises = marketContractValues.outcomeTokens.map((token) =>
-      getBalanceOf({ outcome_id: token.outcome_id, account_id: walletState.address! }).then((balance_of) => ({
+      getBalanceOf({ outcome_id: token.outcome_id, account_id: address! }).then((balance_of) => ({
         ...token,
         balance_of,
         value: marketContractValues.market.options[token.outcome_id],

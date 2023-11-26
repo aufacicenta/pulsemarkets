@@ -5,6 +5,7 @@ import { useTranslation } from "next-i18next";
 import { ChangeEvent, useEffect, useState } from "react";
 import _ from "lodash";
 import Countdown from "react-countdown";
+import { useAccount } from "wagmi";
 
 import { Card } from "ui/card/Card";
 import { Typography } from "ui/typography/Typography";
@@ -14,7 +15,6 @@ import pulse from "providers/pulse";
 import useNearFungibleTokenContract from "providers/near/contracts/fungible-token/useNearFungibleTokenContract";
 import currency from "providers/currency";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { WrappedBalance } from "providers/near/contracts/market/market.types";
 import date from "providers/date";
 import { useNearMarketContractContext } from "context/near/market-contract/useNearMarketContractContext";
@@ -52,9 +52,9 @@ export const SwapCard: React.FC<SwapCardProps> = ({
   const [rate, setRate] = useState("0.00");
   const [fee, setFee] = useState("0.00");
 
-  const wallet = useWalletStateContext();
   const { t } = useTranslation(["swap-card"]);
   const toast = useToastContext();
+  const { isConnected, address } = useAccount();
 
   const FungibleTokenContract = useNearFungibleTokenContract({ contractAddress: collateralTokenMetadata.id });
   const MarketContract = useNearMarketContractContext();
@@ -73,13 +73,13 @@ export const SwapCard: React.FC<SwapCardProps> = ({
   };
 
   const updateOutcomeTokenBalance = async () => {
-    if (!wallet.isConnected) {
+    if (!isConnected) {
       return;
     }
 
     const outcomeTokenBalance = await MarketContract.getBalanceOf({
       outcome_id: MarketContract.selectedOutcomeToken!.outcome_id,
-      account_id: wallet.address!,
+      account_id: address!,
     });
 
     setBalance(currency.convert.toDecimalsPrecisionString(outcomeTokenBalance, ftMetadata?.decimals!));
@@ -151,7 +151,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({
     const [amountPayable] = await MarketContract.getAmountPayable({
       amount,
       outcome_id: MarketContract.selectedOutcomeToken!.outcome_id,
-      account_id: wallet.address || near.getConfig().guestWalletId,
+      account_id: address || near.getConfig().guestWalletId,
     });
 
     const rateString = currency.convert.fromUIntAmount(amountPayable, decimals);
@@ -246,7 +246,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({
   };
 
   const getSubmitButton = () => {
-    if (!wallet.isConnected) {
+    if (!isConnected) {
       return (
         <Button disabled fullWidth>
           {canClaim ? "Connect to Claim" : "Connect to Bet"}

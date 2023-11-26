@@ -23,15 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
                 target="_blank"
                 className={styles["footer__powered-by"]}
               >
-                <AufacicentaIcon /> {t("promptWars.footer.madeByAufacicenta")}
-              </Typography.Anchor>
-              <Typography.Anchor
-                flat
-                href="https://docs.pulsemarkets.org"
-                target="_blank"
-                className={styles["footer__powered-by"]}
-              >
-                &nbsp; {t("promptWars.footer.poweredByPulseProtocol")}
+                <AufacicentaIcon /> <span>{t("promptWars.footer.madeByAufacicenta")}</span>
               </Typography.Anchor>
             </div>
           </Grid.Col>

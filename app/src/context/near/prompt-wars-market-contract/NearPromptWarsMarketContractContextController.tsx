@@ -1,6 +1,8 @@
+// TODO: do we need this file ?
 import React, { useState } from "react";
 import { setTimeout } from "timers";
 import { useRouter } from "next/router";
+import { useAccount } from "wagmi";
 
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { Typography } from "ui/typography/Typography";
@@ -11,7 +13,6 @@ import {
   PromptWarsMarketContractStatus,
   PromptWarsMarketContractValues,
 } from "providers/near/contracts/prompt-wars/prompt-wars.types";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { FungibleTokenContract } from "providers/near/contracts/fungible-token/contract";
 import currency from "providers/currency";
 import { useRoutes } from "hooks/useRoutes/useRoutes";
@@ -47,8 +48,9 @@ export const NearPromptWarsMarketContractContextController = ({
   const router = useRouter();
 
   const toast = useToastContext();
-
-  const walletStateContext = useWalletStateContext();
+  // TODO
+  const walletStateContext = { context: { connection: undefined, wallet: undefined } };
+  const { isConnected } = useAccount();
 
   const getMarketStatus = (values: PromptWarsMarketContractValues): PromptWarsMarketContractStatus => {
     if (!values) {
@@ -163,7 +165,7 @@ export const NearPromptWarsMarketContractContextController = ({
   };
 
   const assertWalletConnection = () => {
-    if (!walletStateContext.isConnected) {
+    if (!isConnected) {
       toast.trigger({
         variant: "info",
         withTimeout: true,

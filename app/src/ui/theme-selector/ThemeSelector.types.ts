@@ -6,4 +6,4 @@ export type ThemeSelectorProps = {
   fixed?: boolean;
 };
 
-export type Theme = "dark" | "light";
+export type Theme = "dark" | "light" | "fileagent" | "fileagent-dark";

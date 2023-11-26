@@ -16,6 +16,10 @@
     border-bottom-left-radius: $border-radius;
     padding: $space-xs $space-s;
     background-color: var(--color-white);
+
+    a {
+      color: var(--color-background) !important;
+    }
   }
 
   a {
