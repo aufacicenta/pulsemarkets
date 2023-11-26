@@ -29,13 +29,11 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({ className }) => 
   return (
     <div className={clsx(styles["wallet-selector"], className)}>
       <Button
-        // color={wallet.actions.isGettingGuestWallet ? "success" : "primary"}
         color="primary"
         variant="outlined"
         onClick={handleOnDisplayWidgetClick}
         rightIcon={<Icon name={address ? "icon-power" : "icon-power-crossed"} />}
         className={styles["wallet-selector__button"]}
-        // animate={wallet.actions.isGettingGuestWallet ? "pulse" : undefined}
         size="s"
       >
         {isConnected ? (
@@ -43,12 +41,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({ className }) => 
             {address}
           </Typography.Text>
         ) : (
-          <>
-            {/* {wallet.actions.isGettingGuestWallet
-              ? t("promptWars.walletSelector.isSettingGuestWallet")
-              : t("promptWars.connectWallet")} */}
-            {t("promptWars.connectWallet")}
-          </>
+          <>{t("promptWars.connectWallet")}</>
         )}
       </Button>
     </div>

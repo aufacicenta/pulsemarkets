@@ -135,8 +135,7 @@
   }
 
   &__mobile {
-    margin-right: -$space-default;
-    margin-left: -$space-default;
+    display: block;
 
     &--button {
       width: 100%;

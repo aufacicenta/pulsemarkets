@@ -3,7 +3,6 @@ import { Field, Form as RFForm } from "react-final-form";
 import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import { useAccount } from "wagmi";
-import { useNearWalletSelectorContext } from "context/near/wallet-selector/useNearWalletSelectorContext";
 
 import { Card } from "ui/card/Card";
 import { Typography } from "ui/typography/Typography";
@@ -17,6 +16,8 @@ import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars
 import { PromptInputCardProps } from "./PromptInputCard.types";
 import styles from "./PromptInputCard.module.scss";
 
+const handleOnDisplayWidgetClick = () => undefined;
+
 export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   onSubmit,
   className,
@@ -26,17 +27,11 @@ export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   const [isNegativePromptFieldVisible, displayNegativePromptField] = useState(false);
   const { isConnected } = useAccount();
 
-  const nearWalletSelectorContext = useNearWalletSelectorContext();
-
   const { actions } = useNearPromptWarsMarketContractContext();
 
   const { status, fees, collateralToken } = marketContractValues;
 
   const isDisabled = status !== PromptWarsMarketContractStatus.OPEN;
-
-  const handleOnDisplayWidgetClick = () => {
-    nearWalletSelectorContext.modal?.show();
-  };
 
   const { t } = useTranslation(["prompt-wars"]);
 
