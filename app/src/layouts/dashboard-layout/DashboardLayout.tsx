@@ -13,7 +13,7 @@ import { Footer } from "ui/footer/Footer";
 import { useLocalStorage } from "hooks/useLocalStorage/useLocalStorage";
 import { ThemeContextController } from "context/theme/ThemeContextController";
 import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
-import { EvmWalletSelectorContextController } from "context/evm-wallet-selector/EvmWalletSelectorContextController";
+import { EvmWalletSelectorContextController } from "context/evm/wallet-selector/EvmWalletSelectorContextController";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
