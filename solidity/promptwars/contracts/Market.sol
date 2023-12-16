@@ -406,7 +406,7 @@ contract Market is Ownable {
     }
 
     // ================================================================
-    // |                        PRIVATE FLAGS                         |
+    // |                        PUBLIC FLAGS                          |
     // ================================================================
 
     /**
@@ -414,7 +414,7 @@ contract Market is Ownable {
      * @dev Compares current timestamp with resolution window.
      * @return bool Whether the contract is resolved or not.
      */
-    function _is_resolved() private view returns (bool) {
+    function _is_resolved() public view returns (bool) {
         return _resolution.resolvedAt != 0;
     }
 
@@ -422,7 +422,7 @@ contract Market is Ownable {
      * @dev Check if the current block timestamp is before the market ends.
      * @return bool Whether the current block timestamp is before the market ends or not.
      */
-    function _is_before_market_ends() private view returns (bool) {
+    function _is_before_market_ends() public view returns (bool) {
         return block.timestamp <= _market.endsAt;
     }
 
@@ -430,7 +430,7 @@ contract Market is Ownable {
      * @dev Check if the reveal window is expired.
      * @return bool Whether the reveal window is expired or not.
      */
-    function _is_reveal_window_expired() private view returns (bool) {
+    function _is_reveal_window_expired() public view returns (bool) {
         return block.timestamp > _resolution.revealWindow;
     }
 
@@ -438,7 +438,7 @@ contract Market is Ownable {
      * @dev Check if the resolution window is expired.
      * @return bool Whether the resolution window is expired or not.
      */
-    function _is_resolution_window_expired() private view returns (bool) {
+    function _is_resolution_window_expired() public view returns (bool) {
         return block.timestamp > _resolution.window;
     }
 
@@ -446,7 +446,7 @@ contract Market is Ownable {
      * @dev Check if the market is expired and unresolved.
      * @return bool Whether the market is expired and unresolved or not.
      */
-    function _is_expired_unresolved() private view returns (bool) {
+    function _is_expired_unresolved() public view returns (bool) {
         return
             !_is_before_market_ends() &&
             _is_resolution_window_expired() &&
@@ -458,7 +458,7 @@ contract Market is Ownable {
      * @param playerId The address of the player to check.
      * @return A boolean indicating whether the player exists.
      */
-    function _player_exists(address playerId) private view returns (bool) {
+    function _player_exists(address playerId) public view returns (bool) {
         return address(players[playerId].id) != address(0);
     }
 
