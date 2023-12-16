@@ -10,11 +10,13 @@ The reasoning behind the game is simple:
 
 Follow [docs.pulsemarkets.org](https://docs.pulsemarkets.org/pulse-markets/) for a broader understanding of the smart-contract Prediction Markets protocol on top of which Prompt Wars is built.
 
-- [Development](#development)
-- [Launching-client](#launching-client)
-- [Solidity Development](#solidity-development)
-- [API](#api)
-- [Contributing](#contributing)
+- [Prompt Wars](#prompt-wars)
+  - [Development](#development)
+    - [Launching the frontend client](#launching-the-frontend-client)
+  - [Solidity Development](#solidity-development)
+    - [Building contract Instructions](#building-contract-instructions)
+  - [Creating new games](#creating-new-games)
+  - [Contributing](#contributing)
 
 <a name="development"/>
 
@@ -68,7 +70,7 @@ export NEXT_PUBLIC_WEBSOCKETS_PORT=8000
 
 ### Building contract Instructions
 
-Whenever you make changes to `solidity/prompt-wars` contracts and compile them either with `npx hardhart compile`, or `npx hardhat test`, you should execute this:
+Whenever you make changes to `solidity/prompt-wars` contracts and compile them either with `npx hardhat compile`, or `npx hardhat test`, you should execute this:
 
 ```bash
 yarn typechain --target=ethers-v6 --out-dir app/src/providers/evm/contracts/prompt-wars solidity/promptwars/artifacts/contracts/Market.sol/Market.json
