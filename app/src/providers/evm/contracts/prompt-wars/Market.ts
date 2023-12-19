@@ -121,6 +121,12 @@ export declare namespace Market {
 export interface MarketInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "_is_before_market_ends"
+      | "_is_expired_unresolved"
+      | "_is_resolution_window_expired"
+      | "_is_resolved"
+      | "_is_reveal_window_expired"
+      | "_player_exists"
       | "get_amount_mintable"
       | "get_block_timestamp"
       | "get_collateral_token_data"
@@ -149,6 +155,12 @@ export interface MarketInterface extends Interface {
       | "RevealPlayerResult",
   ): EventFragment;
 
+  encodeFunctionData(functionFragment: "_is_before_market_ends", values?: undefined): string;
+  encodeFunctionData(functionFragment: "_is_expired_unresolved", values?: undefined): string;
+  encodeFunctionData(functionFragment: "_is_resolution_window_expired", values?: undefined): string;
+  encodeFunctionData(functionFragment: "_is_resolved", values?: undefined): string;
+  encodeFunctionData(functionFragment: "_is_reveal_window_expired", values?: undefined): string;
+  encodeFunctionData(functionFragment: "_player_exists", values: [AddressLike]): string;
   encodeFunctionData(functionFragment: "get_amount_mintable", values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: "get_block_timestamp", values?: undefined): string;
   encodeFunctionData(functionFragment: "get_collateral_token_data", values?: undefined): string;
@@ -166,6 +178,12 @@ export interface MarketInterface extends Interface {
   encodeFunctionData(functionFragment: "sell", values?: undefined): string;
   encodeFunctionData(functionFragment: "transferOwnership", values: [AddressLike]): string;
 
+  decodeFunctionResult(functionFragment: "_is_before_market_ends", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "_is_expired_unresolved", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "_is_resolution_window_expired", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "_is_resolved", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "_is_reveal_window_expired", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "_player_exists", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_amount_mintable", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_block_timestamp", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_collateral_token_data", data: BytesLike): Result;
@@ -315,6 +333,18 @@ export interface Market extends BaseContract {
   listeners(eventName?: string): Promise<Array<Listener>>;
   removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>;
 
+  _is_before_market_ends: TypedContractMethod<[], [boolean], "view">;
+
+  _is_expired_unresolved: TypedContractMethod<[], [boolean], "view">;
+
+  _is_resolution_window_expired: TypedContractMethod<[], [boolean], "view">;
+
+  _is_resolved: TypedContractMethod<[], [boolean], "view">;
+
+  _is_reveal_window_expired: TypedContractMethod<[], [boolean], "view">;
+
+  _player_exists: TypedContractMethod<[playerId: AddressLike], [boolean], "view">;
+
   get_amount_mintable: TypedContractMethod<[amount: BigNumberish], [[bigint, bigint]], "view">;
 
   get_block_timestamp: TypedContractMethod<[], [bigint], "view">;
@@ -349,6 +379,12 @@ export interface Market extends BaseContract {
 
   getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T;
 
+  getFunction(nameOrSignature: "_is_before_market_ends"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "_is_expired_unresolved"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "_is_resolution_window_expired"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "_is_resolved"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "_is_reveal_window_expired"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "_player_exists"): TypedContractMethod<[playerId: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "get_amount_mintable",
   ): TypedContractMethod<[amount: BigNumberish], [[bigint, bigint]], "view">;
