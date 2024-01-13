@@ -215,18 +215,12 @@ export const PromptWarsMarketContractContextController = ({
       }));
 
       const amount = marketContractValues.fees.price.toString();
-      const msg = JSON.stringify({ CreateOutcomeTokenArgs: { prompt: JSON.stringify(prompt) } });
 
-      // TODO: What is fungible contract
-      // await FungibleTokenContract.ftTransferCall(
-      //   walletStateContext.context.wallet!,
-      //   marketContractValues.collateralToken.id!,
-      //   {
-      //     receiver_id: marketId,
-      //     amount,
-      //     msg,
-      //   },
-      // );
+      if (!signer) throw new Error("not signed in");
+
+      const contract = await connect(DEPLOYED_CONTRACT_ADDRESS, signer);
+
+      await contract.register(prompt);
 
       setActions((prev) => ({
         ...prev,
@@ -308,7 +302,6 @@ export const PromptWarsMarketContractContextController = ({
     marketId,
     marketContractValues,
     create,
-    // getOutcomeToken,
   };
 
   return <PromptWarsMarketContractContext.Provider value={props}>{children}</PromptWarsMarketContractContext.Provider>;
