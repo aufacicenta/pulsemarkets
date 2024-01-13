@@ -292,6 +292,21 @@ export const PromptWarsMarketContractContextController = ({
     }));
   };
 
+  const getPlayer = async (playerId: string) => {
+    try {
+      if (!signer) throw new Error("not signed in");
+
+      const contract = await connect(DEPLOYED_CONTRACT_ADDRESS, signer);
+      const player = await contract.get_player(playerId);
+
+      return player;
+    } catch (error) {
+      console.log(error);
+    }
+
+    return undefined;
+  };
+
   const props: PromptWarsMarketContractContextType = {
     deploy,
     connect,
@@ -302,6 +317,7 @@ export const PromptWarsMarketContractContextController = ({
     marketId,
     marketContractValues,
     create,
+    getOutcomeToken: getPlayer,
   };
 
   return <PromptWarsMarketContractContext.Provider value={props}>{children}</PromptWarsMarketContractContext.Provider>;
