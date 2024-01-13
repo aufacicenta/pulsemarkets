@@ -121,12 +121,6 @@ export declare namespace Market {
 export interface MarketInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "_is_before_market_ends"
-      | "_is_expired_unresolved"
-      | "_is_resolution_window_expired"
-      | "_is_resolved"
-      | "_is_reveal_window_expired"
-      | "_player_exists"
       | "get_amount_mintable"
       | "get_block_timestamp"
       | "get_collateral_token_data"
@@ -136,7 +130,13 @@ export interface MarketInterface extends Interface {
       | "get_player"
       | "get_players_count"
       | "get_resolution_data"
+      | "is_before_market_ends"
+      | "is_expired_unresolved"
+      | "is_resolution_window_expired"
+      | "is_resolved"
+      | "is_reveal_window_expired"
       | "owner"
+      | "player_exists"
       | "register"
       | "renounceOwnership"
       | "resolve"
@@ -155,12 +155,6 @@ export interface MarketInterface extends Interface {
       | "RevealPlayerResult",
   ): EventFragment;
 
-  encodeFunctionData(functionFragment: "_is_before_market_ends", values?: undefined): string;
-  encodeFunctionData(functionFragment: "_is_expired_unresolved", values?: undefined): string;
-  encodeFunctionData(functionFragment: "_is_resolution_window_expired", values?: undefined): string;
-  encodeFunctionData(functionFragment: "_is_resolved", values?: undefined): string;
-  encodeFunctionData(functionFragment: "_is_reveal_window_expired", values?: undefined): string;
-  encodeFunctionData(functionFragment: "_player_exists", values: [AddressLike]): string;
   encodeFunctionData(functionFragment: "get_amount_mintable", values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: "get_block_timestamp", values?: undefined): string;
   encodeFunctionData(functionFragment: "get_collateral_token_data", values?: undefined): string;
@@ -170,7 +164,13 @@ export interface MarketInterface extends Interface {
   encodeFunctionData(functionFragment: "get_player", values: [AddressLike]): string;
   encodeFunctionData(functionFragment: "get_players_count", values?: undefined): string;
   encodeFunctionData(functionFragment: "get_resolution_data", values?: undefined): string;
+  encodeFunctionData(functionFragment: "is_before_market_ends", values?: undefined): string;
+  encodeFunctionData(functionFragment: "is_expired_unresolved", values?: undefined): string;
+  encodeFunctionData(functionFragment: "is_resolution_window_expired", values?: undefined): string;
+  encodeFunctionData(functionFragment: "is_resolved", values?: undefined): string;
+  encodeFunctionData(functionFragment: "is_reveal_window_expired", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "player_exists", values: [AddressLike]): string;
   encodeFunctionData(functionFragment: "register", values: [string]): string;
   encodeFunctionData(functionFragment: "renounceOwnership", values?: undefined): string;
   encodeFunctionData(functionFragment: "resolve", values: [AddressLike]): string;
@@ -178,12 +178,6 @@ export interface MarketInterface extends Interface {
   encodeFunctionData(functionFragment: "sell", values?: undefined): string;
   encodeFunctionData(functionFragment: "transferOwnership", values: [AddressLike]): string;
 
-  decodeFunctionResult(functionFragment: "_is_before_market_ends", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "_is_expired_unresolved", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "_is_resolution_window_expired", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "_is_resolved", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "_is_reveal_window_expired", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "_player_exists", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_amount_mintable", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_block_timestamp", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_collateral_token_data", data: BytesLike): Result;
@@ -193,7 +187,13 @@ export interface MarketInterface extends Interface {
   decodeFunctionResult(functionFragment: "get_player", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_players_count", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "get_resolution_data", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "is_before_market_ends", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "is_expired_unresolved", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "is_resolution_window_expired", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "is_resolved", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "is_reveal_window_expired", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "player_exists", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "renounceOwnership", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
@@ -333,18 +333,6 @@ export interface Market extends BaseContract {
   listeners(eventName?: string): Promise<Array<Listener>>;
   removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>;
 
-  _is_before_market_ends: TypedContractMethod<[], [boolean], "view">;
-
-  _is_expired_unresolved: TypedContractMethod<[], [boolean], "view">;
-
-  _is_resolution_window_expired: TypedContractMethod<[], [boolean], "view">;
-
-  _is_resolved: TypedContractMethod<[], [boolean], "view">;
-
-  _is_reveal_window_expired: TypedContractMethod<[], [boolean], "view">;
-
-  _player_exists: TypedContractMethod<[playerId: AddressLike], [boolean], "view">;
-
   get_amount_mintable: TypedContractMethod<[amount: BigNumberish], [[bigint, bigint]], "view">;
 
   get_block_timestamp: TypedContractMethod<[], [bigint], "view">;
@@ -363,7 +351,19 @@ export interface Market extends BaseContract {
 
   get_resolution_data: TypedContractMethod<[], [Market.ResolutionStructOutput], "view">;
 
+  is_before_market_ends: TypedContractMethod<[], [boolean], "view">;
+
+  is_expired_unresolved: TypedContractMethod<[], [boolean], "view">;
+
+  is_resolution_window_expired: TypedContractMethod<[], [boolean], "view">;
+
+  is_resolved: TypedContractMethod<[], [boolean], "view">;
+
+  is_reveal_window_expired: TypedContractMethod<[], [boolean], "view">;
+
   owner: TypedContractMethod<[], [string], "view">;
+
+  player_exists: TypedContractMethod<[playerId: AddressLike], [boolean], "view">;
 
   register: TypedContractMethod<[prompt: string], [void], "nonpayable">;
 
@@ -379,12 +379,6 @@ export interface Market extends BaseContract {
 
   getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T;
 
-  getFunction(nameOrSignature: "_is_before_market_ends"): TypedContractMethod<[], [boolean], "view">;
-  getFunction(nameOrSignature: "_is_expired_unresolved"): TypedContractMethod<[], [boolean], "view">;
-  getFunction(nameOrSignature: "_is_resolution_window_expired"): TypedContractMethod<[], [boolean], "view">;
-  getFunction(nameOrSignature: "_is_resolved"): TypedContractMethod<[], [boolean], "view">;
-  getFunction(nameOrSignature: "_is_reveal_window_expired"): TypedContractMethod<[], [boolean], "view">;
-  getFunction(nameOrSignature: "_player_exists"): TypedContractMethod<[playerId: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "get_amount_mintable",
   ): TypedContractMethod<[amount: BigNumberish], [[bigint, bigint]], "view">;
@@ -400,7 +394,13 @@ export interface Market extends BaseContract {
   ): TypedContractMethod<[playerId: AddressLike], [Market.PlayerStructOutput], "view">;
   getFunction(nameOrSignature: "get_players_count"): TypedContractMethod<[], [bigint], "view">;
   getFunction(nameOrSignature: "get_resolution_data"): TypedContractMethod<[], [Market.ResolutionStructOutput], "view">;
+  getFunction(nameOrSignature: "is_before_market_ends"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "is_expired_unresolved"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "is_resolution_window_expired"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "is_resolved"): TypedContractMethod<[], [boolean], "view">;
+  getFunction(nameOrSignature: "is_reveal_window_expired"): TypedContractMethod<[], [boolean], "view">;
   getFunction(nameOrSignature: "owner"): TypedContractMethod<[], [string], "view">;
+  getFunction(nameOrSignature: "player_exists"): TypedContractMethod<[playerId: AddressLike], [boolean], "view">;
   getFunction(nameOrSignature: "register"): TypedContractMethod<[prompt: string], [void], "nonpayable">;
   getFunction(nameOrSignature: "renounceOwnership"): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(nameOrSignature: "resolve"): TypedContractMethod<[playerId: AddressLike], [void], "nonpayable">;

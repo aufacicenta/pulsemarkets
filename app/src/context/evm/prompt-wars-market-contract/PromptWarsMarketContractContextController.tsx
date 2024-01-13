@@ -12,7 +12,6 @@ import { PromptWarsMarketContractContext } from "./PromptWarsMarketContractConte
 import {
   PromptWarsMarketContractContextControllerProps,
   PromptWarsMarketContractContextType,
-  PromptWarsMarketContractStatus,
   PromptWarsMarketContractValues,
   PromptWarsMarketContractContextContextActions,
 } from "./PromptWarsMarketContractContext.types";
@@ -61,34 +60,6 @@ const connect = async (address: string, provider: ethers.Signer | ethers.Provide
 };
 
 const DEPLOYED_CONTRACT_ADDRESS = "0x00";
-
-const getMarketStatus = (values: PromptWarsMarketContractValues): PromptWarsMarketContractStatus => {
-  if (!values) {
-    return PromptWarsMarketContractStatus.LOADING;
-  }
-
-  if (values?.isOpen) {
-    return PromptWarsMarketContractStatus.OPEN;
-  }
-
-  if (values?.isOver && values.isResolved) {
-    return PromptWarsMarketContractStatus.RESOLVED;
-  }
-
-  if (values?.isOver && !values.isRevealWindowExpired) {
-    return PromptWarsMarketContractStatus.REVEALING;
-  }
-
-  if (values?.isOver && !values.isResolutionWindowExpired) {
-    return PromptWarsMarketContractStatus.RESOLVING;
-  }
-
-  if (values?.isOver && values.isExpiredUnresolved) {
-    return PromptWarsMarketContractStatus.UNRESOLVED;
-  }
-
-  return PromptWarsMarketContractStatus.CLOSED;
-};
 
 let marketContract: Market;
 
@@ -153,26 +124,20 @@ export const PromptWarsMarketContractContextController = ({
             fees,
             management,
             collateralToken,
-            // outcomeIds,
-            // isResolved,
-            // isOpen,
-            // isOver,
-            // isRevealWindowExpired,
-            // isResolutionWindowExpired,
-            // isExpiredUnresolved,
+            isResolved,
+            isRevealWindowExpired,
+            isResolutionWindowExpired,
+            isExpiredUnresolved,
           ] = await Promise.all([
             contract.get_market_data(),
             contract.get_resolution_data(),
             contract.get_fees_data(),
             contract.get_management_data(),
             contract.get_collateral_token_data(),
-            // contract.get_outcome_ids(),
-            // contract.is_resolved(),
-            // contract.is_open(),
-            // contract.is_over(),
-            // contract.is_reveal_window_expired(),
-            // contract.is_resolution_window_expired(),
-            // contract.is_expired_unresolved(),
+            contract.is_resolved(),
+            contract.is_reveal_window_expired(),
+            contract.is_resolution_window_expired(),
+            contract.is_expired_unresolved(),
           ]);
 
           const values: PromptWarsMarketContractValues = {
@@ -181,20 +146,11 @@ export const PromptWarsMarketContractContextController = ({
             fees,
             management,
             collateralToken,
-            // TODO:
-            outcomeIds: [],
-            isResolved: false,
-            isOpen: false,
-            isOver: false,
-            isRevealWindowExpired: false,
-            isResolutionWindowExpired: false,
-            isExpiredUnresolved: false,
-            status: PromptWarsMarketContractStatus.LOADING,
+            isResolved,
+            isRevealWindowExpired,
+            isResolutionWindowExpired,
+            isExpiredUnresolved,
           };
-
-          const status = getMarketStatus(values);
-
-          values.status = status;
 
           setMarketContractValues(values);
         } catch (error) {
@@ -217,24 +173,6 @@ export const PromptWarsMarketContractContextController = ({
       },
     }));
   };
-
-  // const getOutcomeToken = async (args: GetOutcomeTokenArgs) => {
-  //   try {
-  //     if (!signer) throw new Error("not signed in");
-
-  //     if (!marketContract) {
-  //       marketContract = await await connect(DEPLOYED_CONTRACT_ADDRESS, signer);
-  //     }
-
-  //     const outcomeToken = await marketContract.get_outcome_token(args);
-
-  //     return outcomeToken;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-
-  //   return undefined;
-  // };
 
   const sell = async () => {
     try {

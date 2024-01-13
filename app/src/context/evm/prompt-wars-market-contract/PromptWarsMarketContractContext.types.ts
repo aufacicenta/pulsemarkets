@@ -10,31 +10,16 @@ export type PromptWarsMarketContractContextControllerProps = {
   children: ReactNode;
 };
 
-export enum PromptWarsMarketContractStatus {
-  LOADING = "Loading",
-  OPEN = "Open",
-  REVEALING = "Revealing",
-  RESOLVING = "Resolving",
-  RESOLVED = "Resolved",
-  UNRESOLVED = "Unresolved",
-  CLOSED = "Closed",
-}
-
 export type PromptWarsMarketContractValues = {
   market: Market.MarketDataStruct;
   resolution: Market.ResolutionStruct;
   fees: Market.FeesStruct;
   management: Market.ManagementStruct;
   collateralToken: Market.CollateralTokenStruct;
-  outcomeIds: Array<string>;
   isResolved: boolean;
-  isOpen: boolean;
-  isOver: boolean;
   isRevealWindowExpired: boolean;
   isResolutionWindowExpired: boolean;
   isExpiredUnresolved: boolean;
-
-  status: PromptWarsMarketContractStatus;
 };
 
 export type PromptWarsMarketContractContextContextActions = {

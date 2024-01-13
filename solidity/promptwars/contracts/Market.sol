@@ -96,7 +96,7 @@ contract Market is Ownable {
     // ================================================================
 
     modifier assertBeforeEnd() {
-        require(_is_before_market_ends(), "ERR_EVENT_ENDED");
+        require(is_before_market_ends(), "ERR_EVENT_ENDED");
         _;
     }
 
@@ -106,18 +106,18 @@ contract Market is Ownable {
     }
 
     modifier assertIsNotResolved() {
-        require(!_is_resolved(), "ERR_EVENT_IS_RESOLVED");
+        require(!is_resolved(), "ERR_EVENT_IS_RESOLVED");
         _;
     }
 
     modifier assertIsRevealWindowOpen() {
-        require(!_is_reveal_window_expired(), "ERR_REVEAL_WINDOW_EXPIRED");
+        require(!is_reveal_window_expired(), "ERR_REVEAL_WINDOW_EXPIRED");
         _;
     }
 
     modifier assertIsResolutionWindowOpen() {
         require(
-            !_is_resolution_window_expired(),
+            !is_resolution_window_expired(),
             "ERR_RESOLUTION_WINDOW_EXPIRED"
         );
         _;
@@ -129,12 +129,12 @@ contract Market is Ownable {
     }
 
     modifier assertIsPlayerRegistered(address playerId) {
-        require(_player_exists(playerId), "ERR_PLAYER_IS_NOT_REGISTERED");
+        require(player_exists(playerId), "ERR_PLAYER_IS_NOT_REGISTERED");
         _;
     }
 
     modifier assertPlayerIsNotRegistered(address playerId) {
-        require(!_player_exists(playerId), "ERR_PLAYER_EXISTS");
+        require(!player_exists(playerId), "ERR_PLAYER_EXISTS");
         _;
     }
 
@@ -320,7 +320,7 @@ contract Market is Ownable {
      * @return The amount sold.
      */
     function sell() public returns (uint) {
-        if (_is_expired_unresolved()) {
+        if (is_expired_unresolved()) {
             return _internal_sell_unresolved();
         }
 
@@ -414,7 +414,7 @@ contract Market is Ownable {
      * @dev Compares current timestamp with resolution window.
      * @return bool Whether the contract is resolved or not.
      */
-    function _is_resolved() public view returns (bool) {
+    function is_resolved() public view returns (bool) {
         return _resolution.resolvedAt != 0;
     }
 
@@ -422,7 +422,7 @@ contract Market is Ownable {
      * @dev Check if the current block timestamp is before the market ends.
      * @return bool Whether the current block timestamp is before the market ends or not.
      */
-    function _is_before_market_ends() public view returns (bool) {
+    function is_before_market_ends() public view returns (bool) {
         return block.timestamp <= _market.endsAt;
     }
 
@@ -430,7 +430,7 @@ contract Market is Ownable {
      * @dev Check if the reveal window is expired.
      * @return bool Whether the reveal window is expired or not.
      */
-    function _is_reveal_window_expired() public view returns (bool) {
+    function is_reveal_window_expired() public view returns (bool) {
         return block.timestamp > _resolution.revealWindow;
     }
 
@@ -438,7 +438,7 @@ contract Market is Ownable {
      * @dev Check if the resolution window is expired.
      * @return bool Whether the resolution window is expired or not.
      */
-    function _is_resolution_window_expired() public view returns (bool) {
+    function is_resolution_window_expired() public view returns (bool) {
         return block.timestamp > _resolution.window;
     }
 
@@ -446,11 +446,11 @@ contract Market is Ownable {
      * @dev Check if the market is expired and unresolved.
      * @return bool Whether the market is expired and unresolved or not.
      */
-    function _is_expired_unresolved() public view returns (bool) {
+    function is_expired_unresolved() public view returns (bool) {
         return
-            !_is_before_market_ends() &&
-            _is_resolution_window_expired() &&
-            !_is_resolved();
+            !is_before_market_ends() &&
+            is_resolution_window_expired() &&
+            !is_resolved();
     }
 
     /**
@@ -458,7 +458,7 @@ contract Market is Ownable {
      * @param playerId The address of the player to check.
      * @return A boolean indicating whether the player exists.
      */
-    function _player_exists(address playerId) public view returns (bool) {
+    function player_exists(address playerId) public view returns (bool) {
         return address(players[playerId].id) != address(0);
     }
 
