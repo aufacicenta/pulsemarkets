@@ -128,6 +128,7 @@ export const PromptWarsMarketContractContextController = ({
             isRevealWindowExpired,
             isResolutionWindowExpired,
             isExpiredUnresolved,
+            isBeforeMarketEnds,
           ] = await Promise.all([
             contract.get_market_data(),
             contract.get_resolution_data(),
@@ -138,6 +139,7 @@ export const PromptWarsMarketContractContextController = ({
             contract.is_reveal_window_expired(),
             contract.is_resolution_window_expired(),
             contract.is_expired_unresolved(),
+            contract.is_before_market_ends(),
           ]);
 
           const values: PromptWarsMarketContractValues = {
@@ -150,6 +152,7 @@ export const PromptWarsMarketContractContextController = ({
             isRevealWindowExpired,
             isResolutionWindowExpired,
             isExpiredUnresolved,
+            isBeforeMarketEnds,
           };
 
           setMarketContractValues(values);

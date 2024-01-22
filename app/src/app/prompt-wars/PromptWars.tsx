@@ -10,11 +10,10 @@ import { ImgPromptCard } from "ui/pulse/img-prompt-card/ImgPromptCard";
 import { GenericLoader } from "ui/generic-loader/GenericLoader";
 import { PromptInputCard } from "ui/pulse/prompt-input-card/PromptInputCard";
 import { FaqsModal } from "ui/pulse/prompt-wars/faqs-modal/FaqsModal";
-import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars-market-contract/useNearPromptWarsMarketContractContext";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
-import { Prompt } from "providers/near/contracts/prompt-wars/prompt-wars.types";
 import { ResultsModal } from "ui/pulse/prompt-wars/results-modal/ResultsModal";
 import { ShareModal } from "ui/pulse/prompt-wars/share-modal/ShareModal";
+import { useEVMPromptWarsMarketContractContext } from "context/evm/prompt-wars-market-contract/useEVMPromptWarsMarketContractContext";
 
 import styles from "./PromptWars.module.scss";
 import { PromptWarsProps } from "./PromptWars.types";
@@ -25,7 +24,7 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   const [isResultsModalVisible, displayResultsModal] = useState(false);
 
   const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions } =
-    useNearPromptWarsMarketContractContext();
+    useEVMPromptWarsMarketContractContext();
 
   const { t } = useTranslation(["prompt-wars"]);
 
@@ -56,8 +55,8 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
     return <GenericLoader />;
   }
 
-  const onSubmit = async (prompt: Prompt) => {
-    if (marketContractValues.isOver) {
+  const onSubmit = async (prompt: string) => {
+    if (!marketContractValues.isBeforeMarketEnds) {
       toast.trigger({
         variant: "error",
         title: t("promptWars.marketisover.title"),

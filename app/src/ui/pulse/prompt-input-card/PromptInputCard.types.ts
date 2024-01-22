@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 
-import { Prompt, PromptWarsMarketContractValues } from "providers/near/contracts/prompt-wars/prompt-wars.types";
+import { PromptWarsMarketContractValues } from "context/evm/prompt-wars-market-contract/PromptWarsMarketContractContext.types";
 
 export type PromptInputCardProps = {
-  onSubmit: (prompt: Prompt) => void;
+  onSubmit: (prompt: string) => void;
   onClickFAQsButton: () => void;
   marketContractValues: PromptWarsMarketContractValues;
   children?: ReactNode;

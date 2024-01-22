@@ -14,6 +14,7 @@ import { useLocalStorage } from "hooks/useLocalStorage/useLocalStorage";
 import { ThemeContextController } from "context/theme/ThemeContextController";
 import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
 import { EvmWalletSelectorContextController } from "context/evm/wallet-selector/EvmWalletSelectorContextController";
+import { PromptWarsMarketContractContextController } from "context/evm/prompt-wars-market-contract/PromptWarsMarketContractContextController";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
@@ -46,29 +47,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
           <ToastContextController>
             <NearMarketFactoryContractContextController>
               <NearPromptWarsMarketContractContextController marketId={marketId}>
-                <div id="modal-root" />
-                <div id="dropdown-portal" />
-                <div
-                  className={clsx(styles["dashboard-layout"], {
-                    [styles["dashboard-layout__with-top-alert"]]: false,
-                  })}
-                >
-                  <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
+                <PromptWarsMarketContractContextController marketId={marketId}>
+                  <div id="modal-root" />
+                  <div id="dropdown-portal" />
+                  <div
+                    className={clsx(styles["dashboard-layout"], {
+                      [styles["dashboard-layout__with-top-alert"]]: false,
+                    })}
+                  >
+                    <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
 
-                  <LocaleSelector fixed />
+                    <LocaleSelector fixed />
 
-                  <PulseSidebar
-                    isOpen={isSidebarOpen}
-                    handleOpen={() => setSidebarVisibility(true)}
-                    handleClose={() => setSidebarVisibility(false)}
-                  />
+                    <PulseSidebar
+                      isOpen={isSidebarOpen}
+                      handleOpen={() => setSidebarVisibility(true)}
+                      handleClose={() => setSidebarVisibility(false)}
+                    />
 
-                  <MainPanel withNavBar>
-                    {children}
+                    <MainPanel withNavBar>
+                      {children}
 
-                    <Footer />
-                  </MainPanel>
-                </div>
+                      <Footer />
+                    </MainPanel>
+                  </div>
+                </PromptWarsMarketContractContextController>
               </NearPromptWarsMarketContractContextController>
             </NearMarketFactoryContractContextController>
           </ToastContextController>

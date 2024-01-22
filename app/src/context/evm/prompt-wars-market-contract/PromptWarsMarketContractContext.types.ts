@@ -20,6 +20,7 @@ export type PromptWarsMarketContractValues = {
   isRevealWindowExpired: boolean;
   isResolutionWindowExpired: boolean;
   isExpiredUnresolved: boolean;
+  isBeforeMarketEnds: boolean;
 };
 
 export type PromptWarsMarketContractContextContextActions = {
