@@ -27,7 +27,7 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
 }) => {
   const { address } = useAccount();
 
-  const { market, resolution, outcomeIds, collateralToken, status } = marketContractValues;
+  const { market, resolution, collateralToken, status, playersCount, currentPlayer } = marketContractValues;
 
   const { t } = useTranslation(["prompt-wars"]);
 
@@ -52,7 +52,7 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
         <>
           <Typography.Text flat>{t(`promptWars.status.${status}`)}</Typography.Text>
           <Typography.MiniDescription>
-            <Countdown date={resolution.window} />
+            <Countdown date={currency.convert.toSafeInt(resolution.window)} />
           </Typography.MiniDescription>
         </>
       );
@@ -64,7 +64,7 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
           <Typography.Text flat>
             {t(`promptWars.status.${status}`)} 🎉
             <br />
-            <span className={styles["img-prompt-card__status--winner"]}>{resolution?.result}</span>
+            <span className={styles["img-prompt-card__status--winner"]}>{resolution?.playerId}</span>
           </Typography.Text>
           <Typography.MiniDescription onClick={onClickSeeResults}>See results</Typography.MiniDescription>
         </>
@@ -93,7 +93,7 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
             <Card withSpotlightEffect className={styles["img-prompt-card__current-img-card"]}>
               <Card.Content className={styles["img-prompt-card__current-img-card--box"]}>
                 <div className={styles["img-prompt-card__current-img-card--file"]}>
-                  <img src={ipfs.asHttpsURL(market.image_uri)} alt="current" />
+                  <img src={ipfs.asHttpsURL(market.imageUri)} alt="current" />
                 </div>
               </Card.Content>
             </Card>
@@ -104,7 +104,7 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
                 <Card.Content className={styles["img-prompt-card__countdown--content"]}>
                   <Typography.Description>{t("promptWars.status.description.timeLeft")}</Typography.Description>
                   <Typography.Headline3 flat>
-                    <Countdown date={market.ends_at} />
+                    <Countdown date={currency.convert.toSafeInt(market.endsAt)} />
                   </Typography.Headline3>
                   {marketContractValues.isResolutionWindowExpired && (
                     <Button
@@ -127,9 +127,9 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
                     <Typography.Description>{t("promptWars.status.description.status")}</Typography.Description>
                     {getStatusElement()}
                     <Typography.Description>{t("promptWars.status.description.participants")}</Typography.Description>
-                    <Typography.Text flat={outcomeIds.includes(address as string)}>{outcomeIds.length}</Typography.Text>
+                    <Typography.Text flat={currentPlayer?.id === address}>{playersCount}</Typography.Text>
                     <Typography.MiniDescription>
-                      {outcomeIds.includes(address as string) ? t("promptWars.status.description.youReIn") : null}
+                      {currentPlayer?.id === address ? t("promptWars.status.description.youReIn") : null}
                     </Typography.MiniDescription>
                     <Typography.Description>{t("promptWars.status.description.totalPriceBag")}</Typography.Description>
                     <Typography.Text flat>

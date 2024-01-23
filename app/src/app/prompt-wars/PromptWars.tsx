@@ -12,6 +12,7 @@ import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { ResultsModal } from "ui/pulse/prompt-wars/results-modal/ResultsModal";
 import { ShareModal } from "ui/pulse/prompt-wars/share-modal/ShareModal";
 import { useEVMPromptWarsMarketContractContext } from "context/evm/prompt-wars-market-contract/useEVMPromptWarsMarketContractContext";
+import { ImgPromptCard } from "ui/pulse/img-prompt-card/ImgPromptCard";
 
 import styles from "./PromptWars.module.scss";
 import { PromptWarsProps } from "./PromptWars.types";
@@ -114,14 +115,14 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
           <div className={styles["prompt-wars__game-row"]}>
             <Grid.Row>
               <Grid.Col lg={7} xs={12} className={styles["prompt-wars__game-row--col-left"]}>
-                {/* <ImgPromptCard
+                <ImgPromptCard
                   marketId={marketId}
                   marketContractValues={marketContractValues}
                   datesElement={<></>}
                   onClaimDepositUnresolved={onClaimDepositUnresolved}
                   onClickSeeResults={onClickSeeResults}
                   onClickCreateNewGame={onClickCreateNewGame}
-                /> */}
+                />
               </Grid.Col>
               <Grid.Col lg={5} xs={12}>
                 {/* <PromptInputCard
