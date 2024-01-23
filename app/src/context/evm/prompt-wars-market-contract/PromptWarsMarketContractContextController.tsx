@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Signer, ethers, BrowserProvider, JsonRpcSigner } from "ethers";
-import { useWalletClient, useAccount } from "wagmi";
+import { useWalletClient, useAccount, Address } from "wagmi";
 import { useRouter } from "next/router";
 import { WalletClient } from "viem";
+import { getContract } from "@wagmi/core";
 
 import { Market, Market__factory } from "providers/evm/contracts/prompt-wars";
 import { useRoutes } from "hooks/useRoutes/useRoutes";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { Typography } from "ui/typography/Typography";
-import evm from "providers/evm";
 
 import { PromptWarsMarketContractContext } from "./PromptWarsMarketContractContext";
 import {
@@ -85,7 +85,7 @@ export const PromptWarsMarketContractContextController = ({
   const routes = useRoutes();
   const router = useRouter();
   const toast = useToastContext();
-  const signer = useEthersSigner({ chainId: evm.config.CHAIN_ID! });
+  const signer = useEthersSigner();
   const { isConnected } = useAccount();
 
   const assertWalletConnection = () => {
@@ -110,9 +110,10 @@ export const PromptWarsMarketContractContextController = ({
     }));
 
     try {
-      if (!signer) throw new Error("not signed in");
-
-      const contract = await connect(marketId, signer);
+      const contract = getContract({
+        address: marketId as Address,
+        abi: Market__factory.abi,
+      });
 
       const [
         market,
@@ -126,16 +127,16 @@ export const PromptWarsMarketContractContextController = ({
         isExpiredUnresolved,
         isBeforeMarketEnds,
       ] = await Promise.all([
-        contract.get_market_data(),
-        contract.get_resolution_data(),
-        contract.get_fees_data(),
-        contract.get_management_data(),
-        contract.get_collateral_token_data(),
-        contract.is_resolved(),
-        contract.is_reveal_window_expired(),
-        contract.is_resolution_window_expired(),
-        contract.is_expired_unresolved(),
-        contract.is_before_market_ends(),
+        contract.read.get_market_data(),
+        contract.read.get_resolution_data(),
+        contract.read.get_fees_data(),
+        contract.read.get_management_data(),
+        contract.read.get_collateral_token_data(),
+        contract.read.is_resolved(),
+        contract.read.is_reveal_window_expired(),
+        contract.read.is_resolution_window_expired(),
+        contract.read.is_expired_unresolved(),
+        contract.read.is_before_market_ends(),
       ]);
 
       const values: PromptWarsMarketContractValues = {

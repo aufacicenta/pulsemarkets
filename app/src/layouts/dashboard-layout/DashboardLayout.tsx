@@ -11,6 +11,8 @@ import { ThemeContextController } from "context/theme/ThemeContextController";
 import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
 import { EvmWalletSelectorContextController } from "context/evm/wallet-selector/EvmWalletSelectorContextController";
 import { PromptWarsMarketContractContextController } from "context/evm/prompt-wars-market-contract/PromptWarsMarketContractContextController";
+import { WalletSelectorNavbar } from "ui/wallet-selector-navbar/WalletSelectorNavbar";
+import { PulseSidebar } from "ui/pulse/sidebar/PulseSidebar";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
@@ -51,15 +53,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
                   [styles["dashboard-layout__with-top-alert"]]: false,
                 })}
               >
-                {/* <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} /> */}
+                <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
 
                 <LocaleSelector fixed />
 
-                {/* <PulseSidebar
-                      isOpen={isSidebarOpen}
-                      handleOpen={() => setSidebarVisibility(true)}
-                      handleClose={() => setSidebarVisibility(false)}
-                    /> */}
+                <PulseSidebar
+                  isOpen={isSidebarOpen}
+                  handleOpen={() => setSidebarVisibility(true)}
+                  handleClose={() => setSidebarVisibility(false)}
+                />
 
                 <MainPanel withNavBar>
                   {children}

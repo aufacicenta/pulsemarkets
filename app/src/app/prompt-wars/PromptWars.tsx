@@ -6,9 +6,7 @@ import { MainPanel } from "ui/mainpanel/MainPanel";
 import { PromptWarsLogo } from "ui/icons/PromptWarsLogo";
 import { Grid } from "ui/grid/Grid";
 import { Typography } from "ui/typography/Typography";
-import { ImgPromptCard } from "ui/pulse/img-prompt-card/ImgPromptCard";
 import { GenericLoader } from "ui/generic-loader/GenericLoader";
-import { PromptInputCard } from "ui/pulse/prompt-input-card/PromptInputCard";
 import { FaqsModal } from "ui/pulse/prompt-wars/faqs-modal/FaqsModal";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { ResultsModal } from "ui/pulse/prompt-wars/results-modal/ResultsModal";
@@ -23,7 +21,7 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   const [isFAQsModalVisible, displayFAQsModal] = useState(false);
   const [isResultsModalVisible, displayResultsModal] = useState(false);
 
-  const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions, signer } =
+  const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions } =
     useEVMPromptWarsMarketContractContext();
 
   const { t } = useTranslation(["prompt-wars"]);
@@ -31,12 +29,8 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   const toast = useToastContext();
 
   useEffect(() => {
-    if (!signer) {
-      return;
-    }
-
     fetchMarketContractValues();
-  }, [marketId, signer]);
+  }, [marketId]);
 
   useEffect(() => {
     if (actions.ftTransferCall.success) {
@@ -45,10 +39,6 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   }, [actions.ftTransferCall.success]);
 
   useEffect(() => {
-    if (!signer) {
-      return undefined;
-    }
-
     const interval = setInterval(() => {
       fetchMarketContractValues();
     }, 5000);
@@ -56,7 +46,7 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
     return () => {
       clearInterval(interval);
     };
-  }, [marketId, signer]);
+  }, [marketId]);
 
   if (!marketContractValues || actions.create.isLoading) {
     // @TODO render PriceMarket skeleton template
@@ -124,21 +114,21 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
           <div className={styles["prompt-wars__game-row"]}>
             <Grid.Row>
               <Grid.Col lg={7} xs={12} className={styles["prompt-wars__game-row--col-left"]}>
-                <ImgPromptCard
+                {/* <ImgPromptCard
                   marketId={marketId}
                   marketContractValues={marketContractValues}
                   datesElement={<></>}
                   onClaimDepositUnresolved={onClaimDepositUnresolved}
                   onClickSeeResults={onClickSeeResults}
                   onClickCreateNewGame={onClickCreateNewGame}
-                />
+                /> */}
               </Grid.Col>
               <Grid.Col lg={5} xs={12}>
-                <PromptInputCard
+                {/* <PromptInputCard
                   onSubmit={onSubmit}
                   onClickFAQsButton={onClickFAQsButton}
                   marketContractValues={marketContractValues}
-                />
+                /> */}
               </Grid.Col>
             </Grid.Row>
           </div>
