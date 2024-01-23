@@ -47,9 +47,11 @@ export type PromptWarsMarketContractContextType = {
   fetchMarketContractValues: () => Promise<void>;
   sell: () => Promise<void>;
   ftTransferCall: (prompt: string) => Promise<void>;
+  create: () => Promise<void>;
+  getOutcomeToken: (playerId: string) => Promise<Market.PlayerStructOutput | undefined>;
+
   actions: PromptWarsMarketContractContextContextActions;
   marketId: AccountId;
   marketContractValues?: PromptWarsMarketContractValues;
-  create: () => Promise<void>;
-  getOutcomeToken: (playerId: string) => Promise<Market.PlayerStructOutput | undefined>;
+  signer?: Signer;
 };

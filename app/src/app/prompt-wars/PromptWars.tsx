@@ -23,7 +23,7 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   const [isFAQsModalVisible, displayFAQsModal] = useState(false);
   const [isResultsModalVisible, displayResultsModal] = useState(false);
 
-  const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions } =
+  const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions, signer } =
     useEVMPromptWarsMarketContractContext();
 
   const { t } = useTranslation(["prompt-wars"]);
@@ -31,8 +31,12 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   const toast = useToastContext();
 
   useEffect(() => {
+    if (!signer) {
+      return;
+    }
+
     fetchMarketContractValues();
-  }, [marketId]);
+  }, [marketId, signer]);
 
   useEffect(() => {
     if (actions.ftTransferCall.success) {
@@ -41,6 +45,10 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
   }, [actions.ftTransferCall.success]);
 
   useEffect(() => {
+    if (!signer) {
+      return undefined;
+    }
+
     const interval = setInterval(() => {
       fetchMarketContractValues();
     }, 5000);
@@ -48,7 +56,7 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
     return () => {
       clearInterval(interval);
     };
-  }, [marketId]);
+  }, [marketId, signer]);
 
   if (!marketContractValues || actions.create.isLoading) {
     // @TODO render PriceMarket skeleton template

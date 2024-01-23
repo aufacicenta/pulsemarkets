@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Signer, ethers, BrowserProvider, JsonRpcSigner } from "ethers";
-import { type WalletClient, useWalletClient, useAccount } from "wagmi";
+import { useWalletClient, useAccount } from "wagmi";
 import { useRouter } from "next/router";
+import { WalletClient } from "viem";
 
 import { Market, Market__factory } from "providers/evm/contracts/prompt-wars";
 import { useRoutes } from "hooks/useRoutes/useRoutes";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { Typography } from "ui/typography/Typography";
+import evm from "providers/evm";
 
 import { PromptWarsMarketContractContext } from "./PromptWarsMarketContractContext";
 import {
@@ -18,13 +20,14 @@ import {
 
 export function walletClientToSigner(walletClient: WalletClient) {
   const { account, chain, transport } = walletClient;
+
   const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
+    chainId: chain!.id,
+    name: chain!.name,
+    ensAddress: chain!.contracts?.ensRegistry?.address,
   };
   const provider = new BrowserProvider(transport, network);
-  const signer = new JsonRpcSigner(provider, account.address);
+  const signer = new JsonRpcSigner(provider, account!.address);
 
   return signer;
 }
@@ -59,21 +62,13 @@ const connect = async (address: string, provider: ethers.Signer | ethers.Provide
   return contract;
 };
 
-const DEPLOYED_CONTRACT_ADDRESS = "0x00";
-
 let marketContract: Market;
 
 export const PromptWarsMarketContractContextController = ({
   marketId,
   children,
 }: PromptWarsMarketContractContextControllerProps) => {
-  const routes = useRoutes();
-  const router = useRouter();
-  const toast = useToastContext();
-  const signer = useEthersSigner();
-
   const [marketContractValues, setMarketContractValues] = useState<PromptWarsMarketContractValues>();
-
   const [actions, setActions] = useState<PromptWarsMarketContractContextContextActions>({
     fetchMarketContractValues: {
       isLoading: false,
@@ -87,6 +82,10 @@ export const PromptWarsMarketContractContextController = ({
     },
   });
 
+  const routes = useRoutes();
+  const router = useRouter();
+  const toast = useToastContext();
+  const signer = useEthersSigner({ chainId: evm.config.CHAIN_ID! });
   const { isConnected } = useAccount();
 
   const assertWalletConnection = () => {
@@ -111,56 +110,51 @@ export const PromptWarsMarketContractContextController = ({
     }));
 
     try {
-      // Wait 1 second to allow flags to change
-      setTimeout(async () => {
-        try {
-          if (!signer) throw new Error("not signed in");
+      if (!signer) throw new Error("not signed in");
 
-          const contract = await connect(DEPLOYED_CONTRACT_ADDRESS, signer);
+      const contract = await connect(marketId, signer);
 
-          const [
-            market,
-            resolution,
-            fees,
-            management,
-            collateralToken,
-            isResolved,
-            isRevealWindowExpired,
-            isResolutionWindowExpired,
-            isExpiredUnresolved,
-            isBeforeMarketEnds,
-          ] = await Promise.all([
-            contract.get_market_data(),
-            contract.get_resolution_data(),
-            contract.get_fees_data(),
-            contract.get_management_data(),
-            contract.get_collateral_token_data(),
-            contract.is_resolved(),
-            contract.is_reveal_window_expired(),
-            contract.is_resolution_window_expired(),
-            contract.is_expired_unresolved(),
-            contract.is_before_market_ends(),
-          ]);
+      const [
+        market,
+        resolution,
+        fees,
+        management,
+        collateralToken,
+        isResolved,
+        isRevealWindowExpired,
+        isResolutionWindowExpired,
+        isExpiredUnresolved,
+        isBeforeMarketEnds,
+      ] = await Promise.all([
+        contract.get_market_data(),
+        contract.get_resolution_data(),
+        contract.get_fees_data(),
+        contract.get_management_data(),
+        contract.get_collateral_token_data(),
+        contract.is_resolved(),
+        contract.is_reveal_window_expired(),
+        contract.is_resolution_window_expired(),
+        contract.is_expired_unresolved(),
+        contract.is_before_market_ends(),
+      ]);
 
-          const values: PromptWarsMarketContractValues = {
-            market,
-            resolution,
-            fees,
-            management,
-            collateralToken,
-            isResolved,
-            isRevealWindowExpired,
-            isResolutionWindowExpired,
-            isExpiredUnresolved,
-            isBeforeMarketEnds,
-          };
+      const values: PromptWarsMarketContractValues = {
+        market,
+        resolution,
+        fees,
+        management,
+        collateralToken,
+        isResolved,
+        isRevealWindowExpired,
+        isResolutionWindowExpired,
+        isExpiredUnresolved,
+        isBeforeMarketEnds,
+      };
 
-          setMarketContractValues(values);
-        } catch (error) {
-          console.log(error);
-        }
-      }, 1000);
-    } catch {
+      setMarketContractValues(values);
+    } catch (error) {
+      console.log(error);
+
       toast.trigger({
         variant: "error",
         withTimeout: true,
@@ -221,7 +215,7 @@ export const PromptWarsMarketContractContextController = ({
 
       if (!signer) throw new Error("not signed in");
 
-      const contract = await connect(DEPLOYED_CONTRACT_ADDRESS, signer);
+      const contract = await connect(marketId, signer);
 
       await contract.register(prompt);
 
@@ -299,7 +293,7 @@ export const PromptWarsMarketContractContextController = ({
     try {
       if (!signer) throw new Error("not signed in");
 
-      const contract = await connect(DEPLOYED_CONTRACT_ADDRESS, signer);
+      const contract = await connect(marketId, signer);
       const player = await contract.get_player(playerId);
 
       return player;
@@ -321,6 +315,7 @@ export const PromptWarsMarketContractContextController = ({
     marketContractValues,
     create,
     getOutcomeToken: getPlayer,
+    signer,
   };
 
   return <PromptWarsMarketContractContext.Provider value={props}>{children}</PromptWarsMarketContractContext.Provider>;
