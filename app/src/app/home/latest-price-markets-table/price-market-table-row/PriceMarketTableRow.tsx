@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import { useEffect } from "react";
 import Countdown from "react-countdown";
+import { useAccount } from "wagmi";
 
 import { useNearMarketContractContext } from "context/near/market-contract/useNearMarketContractContext";
 import { Typography } from "ui/typography/Typography";
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import currency from "providers/currency";
 import { useRoutes } from "hooks/useRoutes/useRoutes";
 
@@ -12,7 +12,7 @@ import { PriceMarketTableRowProps } from "./PriceMarketTableRow.types";
 import styles from "./PriceMarketTableRow.module.scss";
 
 export const PriceMarketTableRow: React.FC<PriceMarketTableRowProps> = ({ className }) => {
-  const walletState = useWalletStateContext();
+  const { isConnected } = useAccount();
   const routes = useRoutes();
 
   const {
@@ -33,7 +33,7 @@ export const PriceMarketTableRow: React.FC<PriceMarketTableRowProps> = ({ classN
   }, [marketContractValues]);
 
   const getOutcomeTokensPosition = () => {
-    if (!walletState.isConnected) {
+    if (!isConnected) {
       return "connect wallet";
     }
 

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+// TODO: do we need this file ?
 import React, { useState } from "react";
+import { useAccount } from "wagmi";
 
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
 import { Typography } from "ui/typography/Typography";
 import date from "providers/date";
@@ -31,10 +32,12 @@ export const NearMarketFactoryContractContextController = ({
   });
 
   const toast = useToastContext();
-  const walletState = useWalletStateContext();
+  const { isConnected } = useAccount();
+  // TODO:
+  const walletState = { context: { connection: undefined, wallet: undefined } };
 
   const assertWalletConnection = () => {
-    if (!walletState.isConnected) {
+    if (!isConnected) {
       toast.trigger({
         variant: "error",
         withTimeout: true,

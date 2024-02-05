@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
-import { OutcomeId, PromptWarsMarketContractValues } from "providers/near/contracts/prompt-wars/prompt-wars.types";
+import { OutcomeId } from "providers/near/contracts/prompt-wars/prompt-wars.types";
+import { PromptWarsMarketContractValues } from "context/evm/prompt-wars-market-contract/PromptWarsMarketContractContext.types";
 
 export type ResultsModalProps = {
   onClose: () => void;

@@ -6,7 +6,6 @@ import Head from "next/head";
 import { DashboardLayout } from "layouts/dashboard-layout/DashboardLayout";
 import { HomeContainer } from "app/home/HomeContainer";
 import { AccountId } from "providers/near/contracts/market/market.types";
-import pulse from "providers/pulse";
 
 const Index: NextPage<{ marketId: AccountId }> = ({ marketId }) => {
   const { t } = useTranslation("head");
@@ -29,7 +28,7 @@ const Index: NextPage<{ marketId: AccountId }> = ({ marketId }) => {
 export const getServerSideProps = async ({ locale }: GetServerSidePropsContext) => {
   await i18n?.reloadResources();
 
-  const marketId = await pulse.promptWars.getLatestMarketId();
+  const marketId = "0xE82d465514305DF28E6C86E3ab429c579DC8499a";
 
   return {
     props: {

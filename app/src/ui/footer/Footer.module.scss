@@ -7,10 +7,6 @@
   &__right {
     padding: $space-default;
     text-align: right;
-
-    a {
-      display: inline-block;
-    }
   }
 
   &__powered-by {
@@ -22,7 +18,7 @@
     svg {
       width: 18px;
       fill: var(--color-background);
-      margin-right: $space-xs;
+      margin-right: $space-s;
     }
   }
 

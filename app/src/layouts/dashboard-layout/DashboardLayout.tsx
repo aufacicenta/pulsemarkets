@@ -4,17 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 import { MainPanel } from "ui/mainpanel/MainPanel";
-import { WalletSelectorNavbar } from "ui/wallet-selector-navbar/WalletSelectorNavbar";
 import { ToastContextController } from "context/toast/ToastContextController";
-import { PulseSidebar } from "ui/pulse/sidebar/PulseSidebar";
-import { NearWalletSelectorContextController } from "context/near/wallet-selector/NearWalletSelectorContextController";
-import { WalletStateContextController } from "context/wallet/state/WalletStateContextController";
-import { NearMarketFactoryContractContextController } from "context/near/market-factory-contract/NearMarketFactoryContractContextController";
-import { NearPromptWarsMarketContractContextController } from "context/near/prompt-wars-market-contract/NearPromptWarsMarketContractContextController";
 import { Footer } from "ui/footer/Footer";
 import { useLocalStorage } from "hooks/useLocalStorage/useLocalStorage";
 import { ThemeContextController } from "context/theme/ThemeContextController";
 import { LocaleSelector } from "ui/locale-selector/LocaleSelector";
+import { EvmWalletSelectorContextController } from "context/evm/wallet-selector/EvmWalletSelectorContextController";
+import { PromptWarsMarketContractContextController } from "context/evm/prompt-wars-market-contract/PromptWarsMarketContractContextController";
+import { WalletSelectorNavbar } from "ui/wallet-selector-navbar/WalletSelectorNavbar";
+import { PulseSidebar } from "ui/pulse/sidebar/PulseSidebar";
 
 import { DashboardLayoutProps } from "./DashboardLayout.types";
 import styles from "./DashboardLayout.module.scss";
@@ -43,39 +41,39 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mark
         <meta property="og:locale" content={locale} />
       </Head>
       <ThemeContextController>
-        <WalletStateContextController>
-          <NearWalletSelectorContextController>
-            <ToastContextController>
-              <NearMarketFactoryContractContextController>
-                <NearPromptWarsMarketContractContextController marketId={marketId}>
-                  <div id="modal-root" />
-                  <div id="dropdown-portal" />
-                  <div
-                    className={clsx(styles["dashboard-layout"], {
-                      [styles["dashboard-layout__with-top-alert"]]: false,
-                    })}
-                  >
-                    <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
+        <EvmWalletSelectorContextController>
+          <ToastContextController>
+            {/* <NearMarketFactoryContractContextController>
+              <NearPromptWarsMarketContractContextController marketId={marketId}> */}
+            <PromptWarsMarketContractContextController marketId={marketId}>
+              <div id="modal-root" />
+              <div id="dropdown-portal" />
+              <div
+                className={clsx(styles["dashboard-layout"], {
+                  [styles["dashboard-layout__with-top-alert"]]: false,
+                })}
+              >
+                <WalletSelectorNavbar onClickSidebarVisibility={() => setSidebarVisibility(true)} />
 
-                    <LocaleSelector fixed />
+                <LocaleSelector fixed />
 
-                    <PulseSidebar
-                      isOpen={isSidebarOpen}
-                      handleOpen={() => setSidebarVisibility(true)}
-                      handleClose={() => setSidebarVisibility(false)}
-                    />
+                <PulseSidebar
+                  isOpen={isSidebarOpen}
+                  handleOpen={() => setSidebarVisibility(true)}
+                  handleClose={() => setSidebarVisibility(false)}
+                />
 
-                    <MainPanel withNavBar>
-                      {children}
+                <MainPanel withNavBar>
+                  {children}
 
-                      <Footer />
-                    </MainPanel>
-                  </div>
-                </NearPromptWarsMarketContractContextController>
-              </NearMarketFactoryContractContextController>
-            </ToastContextController>
-          </NearWalletSelectorContextController>
-        </WalletStateContextController>
+                  <Footer />
+                </MainPanel>
+              </div>
+            </PromptWarsMarketContractContextController>
+            {/* </NearPromptWarsMarketContractContextController>
+            </NearMarketFactoryContractContextController> */}
+          </ToastContextController>
+        </EvmWalletSelectorContextController>
       </ThemeContextController>
     </>
   );

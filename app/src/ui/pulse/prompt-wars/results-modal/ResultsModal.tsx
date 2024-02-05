@@ -7,8 +7,8 @@ import { Grid } from "ui/grid/Grid";
 import { Card } from "ui/card/Card";
 import ipfs from "providers/ipfs";
 import { OutcomeId } from "providers/near/contracts/prompt-wars/prompt-wars.types";
-import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars-market-contract/useNearPromptWarsMarketContractContext";
 import { Icon } from "ui/icon/Icon";
+import { useEVMPromptWarsMarketContractContext } from "context/evm/prompt-wars-market-contract/useEVMPromptWarsMarketContractContext";
 
 import styles from "./ResultsModal.module.scss";
 import { ResultsModalOutcomeToken, ResultsModalProps } from "./ResultsModal.types";
@@ -17,9 +17,9 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({ onClose, className, 
   const [outcomeToken, setOutcomeToken] = useState<ResultsModalOutcomeToken | undefined>();
   const [winnerOutcomeToken, setWinnerOutcomeToken] = useState<ResultsModalOutcomeToken | undefined>();
 
-  const contract = useNearPromptWarsMarketContractContext();
+  const contract = useEVMPromptWarsMarketContractContext();
 
-  const { resolution, market, outcomeIds, isResolved } = marketContractValues;
+  const { resolution, market, isResolved } = marketContractValues;
 
   const getOutcomeToken = async (outcome_id: OutcomeId) => {
     const ot = await contract.getOutcomeToken({ outcome_id });
@@ -79,9 +79,9 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({ onClose, className, 
         <Typography.Text flat>
           Winner:{" "}
           <>
-            {resolution?.result ? (
+            {resolution?.playerId ? (
               <>
-                {resolution?.result}, {winnerOutcomeToken?.result}
+                {resolution?.playerId}, {winnerOutcomeToken?.result}
               </>
             ) : (
               "TBD"
@@ -94,7 +94,7 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({ onClose, className, 
           <Grid.Col lg={4} className={styles["results-modal__img-col"]}>
             <Card>
               <Card.Content className={styles["results-modal__img-col--content"]}>
-                <img src={ipfs.asHttpsURL(market.image_uri)} alt="source" />
+                <img src={ipfs.asHttpsURL(market.imageUri)} alt="source" />
               </Card.Content>
             </Card>
           </Grid.Col>

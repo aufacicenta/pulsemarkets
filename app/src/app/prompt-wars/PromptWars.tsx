@@ -6,15 +6,13 @@ import { MainPanel } from "ui/mainpanel/MainPanel";
 import { PromptWarsLogo } from "ui/icons/PromptWarsLogo";
 import { Grid } from "ui/grid/Grid";
 import { Typography } from "ui/typography/Typography";
-import { ImgPromptCard } from "ui/pulse/img-prompt-card/ImgPromptCard";
 import { GenericLoader } from "ui/generic-loader/GenericLoader";
-import { PromptInputCard } from "ui/pulse/prompt-input-card/PromptInputCard";
 import { FaqsModal } from "ui/pulse/prompt-wars/faqs-modal/FaqsModal";
-import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars-market-contract/useNearPromptWarsMarketContractContext";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
-import { Prompt } from "providers/near/contracts/prompt-wars/prompt-wars.types";
-import { ResultsModal } from "ui/pulse/prompt-wars/results-modal/ResultsModal";
 import { ShareModal } from "ui/pulse/prompt-wars/share-modal/ShareModal";
+import { useEVMPromptWarsMarketContractContext } from "context/evm/prompt-wars-market-contract/useEVMPromptWarsMarketContractContext";
+import { ImgPromptCard } from "ui/pulse/img-prompt-card/ImgPromptCard";
+import { PromptInputCard } from "ui/pulse/prompt-input-card/PromptInputCard";
 
 import styles from "./PromptWars.module.scss";
 import { PromptWarsProps } from "./PromptWars.types";
@@ -22,10 +20,9 @@ import { PromptWarsProps } from "./PromptWars.types";
 export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) => {
   const [isShareModalVisible, displayShareModal] = useState(false);
   const [isFAQsModalVisible, displayFAQsModal] = useState(false);
-  const [isResultsModalVisible, displayResultsModal] = useState(false);
 
   const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions } =
-    useNearPromptWarsMarketContractContext();
+    useEVMPromptWarsMarketContractContext();
 
   const { t } = useTranslation(["prompt-wars"]);
 
@@ -56,8 +53,8 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
     return <GenericLoader />;
   }
 
-  const onSubmit = async (prompt: Prompt) => {
-    if (marketContractValues.isOver) {
+  const onSubmit = async (prompt: string) => {
+    if (!marketContractValues.isBeforeMarketEnds) {
       toast.trigger({
         variant: "error",
         title: t("promptWars.marketisover.title"),
@@ -84,14 +81,6 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
 
   const onClickFAQsButton = () => {
     displayFAQsModal(true);
-  };
-
-  const onClickCloseResultsModal = () => {
-    displayResultsModal(false);
-  };
-
-  const onClickSeeResults = () => {
-    displayResultsModal(true);
   };
 
   const onClickCreateNewGame = async () => {
@@ -122,7 +111,6 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
                   marketContractValues={marketContractValues}
                   datesElement={<></>}
                   onClaimDepositUnresolved={onClaimDepositUnresolved}
-                  onClickSeeResults={onClickSeeResults}
                   onClickCreateNewGame={onClickCreateNewGame}
                 />
               </Grid.Col>
@@ -141,10 +129,6 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
       {isShareModalVisible && <ShareModal onClose={onClickCloseShareModal} />}
 
       {isFAQsModalVisible && <FaqsModal onClose={onClickCloseFAQsModal} />}
-
-      {isResultsModalVisible && (
-        <ResultsModal onClose={onClickCloseResultsModal} marketContractValues={marketContractValues} />
-      )}
     </>
   );
 };

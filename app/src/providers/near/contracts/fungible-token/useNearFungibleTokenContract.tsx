@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 
-import { useWalletStateContext } from "context/wallet/state/useWalletStateContext";
 import { AccountId } from "../market/market.types";
 import currency from "providers/currency";
 
@@ -23,11 +23,13 @@ export default ({ contractAddress }: { contractAddress?: string }) => {
   const [guestContract, setGuestContract] = useState<FungibleTokenContract>();
   const [balanceOf, setBalanceOf] = useState("0.00");
 
-  const walletState = useWalletStateContext();
-  const { connection } = walletState.context;
+  const { isConnected, address } = useAccount();
+
+  // TODO: What is connection ?
+  const connection = null;
 
   const assertWalletConnection = () => {
-    if (!walletState.isConnected) {
+    if (!isConnected) {
       throw new Error("ERR_USE_NEAR_FT_CONTRACT_INVALID_WALLET_CONNECTION");
     }
   };
@@ -90,7 +92,7 @@ export default ({ contractAddress }: { contractAddress?: string }) => {
       assertGuestContractConnection();
       assertContractMetadata();
 
-      const balance = await guestContract!.ftBalanceOf({ account_id: walletState.address! });
+      const balance = await guestContract!.ftBalanceOf({ account_id: address! });
 
       return currency.convert.toDecimalsPrecisionString(balance, metadata!.decimals);
     } catch {

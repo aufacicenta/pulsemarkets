@@ -135,13 +135,11 @@
   }
 
   &__mobile {
-    margin-right: -$space-default;
-    margin-left: -$space-default;
-    padding: $space-default;
-    background-color: black;
+    display: block;
 
     &--button {
       width: 100%;
+      font-weight: $font-weight-bold;
       text-transform: lowercase;
     }
 

@@ -169,6 +169,7 @@ module.exports = {
     "unicorn/no-array-reduce": "off",
     "unicorn/consistent-destructuring": "off",
     "unicorn/no-array-for-each": "off",
+    "unicorn/no-abusive-eslint-disable": "off",
 
     // a11y
     "jsx-a11y/anchor-is-valid": "off",
