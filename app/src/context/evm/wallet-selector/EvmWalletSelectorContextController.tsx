@@ -1,7 +1,8 @@
 import React from "react";
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
-import { WagmiConfig } from "wagmi";
-import { arbitrum, mainnet, optimism, polygon, avalanche, bsc, gnosis, fantom } from "viem/chains";
+import { WagmiConfig, configureChains } from "wagmi";
+import { optimismSepolia, optimism } from "viem/chains";
+import { publicProvider } from "wagmi/providers/public";
 
 import { EvmWalletSelectorContext } from "./EvmWalletSelectorContext";
 import {
@@ -22,7 +23,7 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
 };
 
-const chains = [mainnet, polygon, avalanche, arbitrum, bsc, optimism, gnosis, fantom];
+const { chains } = configureChains([optimismSepolia, optimism], [publicProvider()]);
 const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
 createWeb3Modal({
@@ -35,8 +36,8 @@ export const EvmWalletSelectorContextController = ({ children }: EvmWalletSelect
   const props: EvmWalletSelectorContextType = {};
 
   return (
-    <EvmWalletSelectorContext.Provider value={props}>
-      <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>
-    </EvmWalletSelectorContext.Provider>
+    <WagmiConfig config={wagmiConfig}>
+      <EvmWalletSelectorContext.Provider value={props}>{children}</EvmWalletSelectorContext.Provider>
+    </WagmiConfig>
   );
 };
