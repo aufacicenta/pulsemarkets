@@ -5,7 +5,6 @@ import { PromptWarsMarketContractValues } from "context/evm/prompt-wars-market-c
 export type ImgPromptCardProps = {
   onClickCreateNewGame: () => void;
   onClaimDepositUnresolved: () => void;
-  onClickSeeResults: () => void;
   marketContractValues: PromptWarsMarketContractValues;
   marketId: string;
   currentResultElement?: ReactNode;

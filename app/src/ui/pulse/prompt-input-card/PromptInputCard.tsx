@@ -3,6 +3,7 @@ import { Field, Form as RFForm } from "react-final-form";
 import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import { useAccount } from "wagmi";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import { Card } from "ui/card/Card";
 import { Typography } from "ui/typography/Typography";
@@ -11,12 +12,10 @@ import { Icon } from "ui/icon/Icon";
 import { PromptWarsMarketContractStatus } from "providers/near/contracts/prompt-wars/prompt-wars.types";
 import currency from "providers/currency";
 import pulse from "providers/pulse";
-import { useNearPromptWarsMarketContractContext } from "context/near/prompt-wars-market-contract/useNearPromptWarsMarketContractContext";
+import { useEVMPromptWarsMarketContractContext } from "context/evm/prompt-wars-market-contract/useEVMPromptWarsMarketContractContext";
 
 import { PromptInputCardProps } from "./PromptInputCard.types";
 import styles from "./PromptInputCard.module.scss";
-
-const handleOnDisplayWidgetClick = () => undefined;
 
 export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   onSubmit,
@@ -25,15 +24,21 @@ export const PromptInputCard: React.FC<PromptInputCardProps> = ({
   marketContractValues,
 }) => {
   const [isNegativePromptFieldVisible, displayNegativePromptField] = useState(false);
-  const { isConnected } = useAccount();
 
-  const { actions } = useNearPromptWarsMarketContractContext();
+  const { t } = useTranslation(["prompt-wars"]);
+
+  const { isConnected } = useAccount();
+  const { open } = useWeb3Modal();
+
+  const { actions } = useEVMPromptWarsMarketContractContext();
 
   const { status, fees, collateralToken } = marketContractValues;
 
   const isDisabled = status !== PromptWarsMarketContractStatus.OPEN;
 
-  const { t } = useTranslation(["prompt-wars"]);
+  const handleOnDisplayWidgetClick = () => {
+    open();
+  };
 
   return (
     <RFForm

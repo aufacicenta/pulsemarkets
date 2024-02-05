@@ -22,7 +22,6 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
   className,
   datesElement,
   onClaimDepositUnresolved,
-  onClickSeeResults,
   onClickCreateNewGame,
 }) => {
   const { address } = useAccount();
@@ -40,9 +39,6 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
           <Typography.Text flat className={styles["img-prompt-card__status--text"]}>
             {t(`promptWars.status.${status}`)} <span>(closest to 0 wins)</span>
           </Typography.Text>
-          <Typography.MiniDescription onClick={onClickSeeResults}>
-            {t("promptWars.status.miniDescription.seeResults")}
-          </Typography.MiniDescription>
         </>
       );
     }
@@ -66,7 +62,6 @@ export const ImgPromptCard: React.FC<ImgPromptCardProps> = ({
             <br />
             <span className={styles["img-prompt-card__status--winner"]}>{resolution?.playerId}</span>
           </Typography.Text>
-          <Typography.MiniDescription onClick={onClickSeeResults}>See results</Typography.MiniDescription>
         </>
       );
     }

@@ -9,10 +9,10 @@ import { Typography } from "ui/typography/Typography";
 import { GenericLoader } from "ui/generic-loader/GenericLoader";
 import { FaqsModal } from "ui/pulse/prompt-wars/faqs-modal/FaqsModal";
 import { useToastContext } from "hooks/useToastContext/useToastContext";
-import { ResultsModal } from "ui/pulse/prompt-wars/results-modal/ResultsModal";
 import { ShareModal } from "ui/pulse/prompt-wars/share-modal/ShareModal";
 import { useEVMPromptWarsMarketContractContext } from "context/evm/prompt-wars-market-contract/useEVMPromptWarsMarketContractContext";
 import { ImgPromptCard } from "ui/pulse/img-prompt-card/ImgPromptCard";
+import { PromptInputCard } from "ui/pulse/prompt-input-card/PromptInputCard";
 
 import styles from "./PromptWars.module.scss";
 import { PromptWarsProps } from "./PromptWars.types";
@@ -20,7 +20,6 @@ import { PromptWarsProps } from "./PromptWars.types";
 export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) => {
   const [isShareModalVisible, displayShareModal] = useState(false);
   const [isFAQsModalVisible, displayFAQsModal] = useState(false);
-  const [isResultsModalVisible, displayResultsModal] = useState(false);
 
   const { marketContractValues, fetchMarketContractValues, ftTransferCall, sell, create, actions } =
     useEVMPromptWarsMarketContractContext();
@@ -84,14 +83,6 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
     displayFAQsModal(true);
   };
 
-  const onClickCloseResultsModal = () => {
-    displayResultsModal(false);
-  };
-
-  const onClickSeeResults = () => {
-    displayResultsModal(true);
-  };
-
   const onClickCreateNewGame = async () => {
     await create();
   };
@@ -120,16 +111,15 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
                   marketContractValues={marketContractValues}
                   datesElement={<></>}
                   onClaimDepositUnresolved={onClaimDepositUnresolved}
-                  onClickSeeResults={onClickSeeResults}
                   onClickCreateNewGame={onClickCreateNewGame}
                 />
               </Grid.Col>
               <Grid.Col lg={5} xs={12}>
-                {/* <PromptInputCard
+                <PromptInputCard
                   onSubmit={onSubmit}
                   onClickFAQsButton={onClickFAQsButton}
                   marketContractValues={marketContractValues}
-                /> */}
+                />
               </Grid.Col>
             </Grid.Row>
           </div>
@@ -139,10 +129,6 @@ export const PromptWars: React.FC<PromptWarsProps> = ({ marketId, className }) =
       {isShareModalVisible && <ShareModal onClose={onClickCloseShareModal} />}
 
       {isFAQsModalVisible && <FaqsModal onClose={onClickCloseFAQsModal} />}
-
-      {isResultsModalVisible && (
-        <ResultsModal onClose={onClickCloseResultsModal} marketContractValues={marketContractValues} />
-      )}
     </>
   );
 };
